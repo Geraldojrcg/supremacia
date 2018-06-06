@@ -32,6 +32,8 @@ public:
     void move(int rx, int ry);
     /// update state
     void update(sf::Event& e);
+    void operator=(const Button & b);
+
 private:
     /// draw methode of Button. Check the SFML Documentation
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;

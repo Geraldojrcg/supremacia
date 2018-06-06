@@ -1,5 +1,0 @@
-## Executar comando dentro da pasta src
-
-g++ -Wall -lallegro -lallegro_ttf -lallegro_font interface.cpp -o 
-interface
-

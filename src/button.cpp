@@ -103,6 +103,16 @@ void Button::move(int rx, int ry)
      this->rect.setPosition(pos.x, pos.y);
      this->position = pos;
 }
+void Button::operator=(const Button & b){
+    /// text config
+    this->text = b.text;
+    this->font = b.font;
+    this->rect = b.rect;
+    this->position = b.position;
+    this->size = b.size;
+    this->state = b.state;
+    
+}
 
 
 
