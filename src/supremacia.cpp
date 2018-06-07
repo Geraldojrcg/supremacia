@@ -215,7 +215,7 @@ void start_game(){
     sf::Music music;
     if(!music.openFromFile("sound/sound.ogg"))
         std::_Exit(EXIT_FAILURE); // error
-    //music.play();
+    music.play();
 
     while (renderWindow.isOpen()){
         //initializing event
