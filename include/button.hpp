@@ -1,5 +1,5 @@
-#ifndef BUTTON_H
-#define BUTTON_H
+#ifndef BUTTON_HPP_INCLUDED
+#define BUTTON_HPP_INCLUDED
 #include <cstring>
 #include <SFML/Graphics.hpp>
 
@@ -22,6 +22,7 @@ public:
     * \param default_color background button color
     */
     Button() = default;
+    void startTerrasBotton(const sf::Vector2f &position, size_t height, void (*on_press)(), sf::Color default_color);
     Button(std::string textstr, const sf::Vector2f &position, size_t height, void (*on_press)(), sf::Color default_color = sf::Color(200, 200, 200));
     /// \return x_axis maximum of the button area
     unsigned int getRightX();

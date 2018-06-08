@@ -56,8 +56,25 @@
 			<Add directory="SFML-2.5.0/lib" />
 		</Linker>
 		<Unit filename="include/button.hpp" />
+		<Unit filename="include/cavaleiro.hpp" />
+		<Unit filename="include/civilizacoes.hpp" />
+		<Unit filename="include/exercito.hpp" />
+		<Unit filename="include/global.hpp" />
+		<Unit filename="include/guerreiro.hpp" />
+		<Unit filename="include/heroi.hpp" />
+		<Unit filename="include/menu.hpp" />
+		<Unit filename="include/soldado.hpp" />
+		<Unit filename="include/territorio.hpp" />
+		<Unit filename="src/Exercito.cpp" />
 		<Unit filename="src/button.cpp" />
+		<Unit filename="src/cavaleiro.cpp" />
+		<Unit filename="src/civilizacoes.cpp" />
+		<Unit filename="src/funcoes.cpp" />
+		<Unit filename="src/guerreiro.cpp" />
+		<Unit filename="src/heroi.cpp" />
 		<Unit filename="src/main.cpp" />
+		<Unit filename="src/menu.cpp" />
+		<Unit filename="src/territorio.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

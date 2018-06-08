@@ -9,11 +9,11 @@
  */
 Button::Button(std::string textstr, const sf::Vector2f &position, size_t height, void (*on_press)(), sf::Color default_color)
 {
-    
+
     /// text config
     this->font.loadFromFile("font/arial.ttf");
     this->text.setFont(this->font);
-    this->text.setFillColor(sf::Color::White);
+    this->text.setColor(sf::Color::White);
     this->text.setCharacterSize(height*0.8);
     this->text.setPosition(position.x+0.5*height, position.y-0.05*height);
     this->text.setString(textstr);
@@ -28,6 +28,20 @@ Button::Button(std::string textstr, const sf::Vector2f &position, size_t height,
     this->state = BT_ENABLE;
     this->on_press = on_press;
 }
+//inicializador de botao terras de territorio
+void Button::startTerrasBotton(const sf::Vector2f &position, size_t height, void (*on_press)(), sf::Color default_color){
+    /// rectangle config
+    sf::FloatRect frect = text.getGlobalBounds();
+    this->size = sf::Vector2f(height, height);
+    this->rect.setSize(this->size);
+    this->position = position;
+    this->rect.setPosition(position);
+    this->rect.setFillColor(default_color);
+    /// others configs
+    this->state = BT_ENABLE;
+    this->on_press = on_press;
+}
+
 /// draw methode of Button. Check the SFML Documentation
 void Button::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
@@ -46,7 +60,7 @@ unsigned int Button::getRightX()
 void Button::press()
 {
     // TODO::change button color
-    this->on_press();   
+    this->on_press();
 }
 /// update state
 void Button::update(sf::Event& e)
@@ -56,11 +70,11 @@ void Button::update(sf::Event& e)
     /// check if the mouse is over button
     if(e.type == sf::Event::MouseMoved)
     {
-        /// check the distance of the mouse and button 
+        /// check the distance of the mouse and button
         int offsetx = e.mouseMove.x - this->position.x;
         int offsety = e.mouseMove.y - this->position.y;
         /// if mouse is outside of button area and button state is BT_HOVER, change its state to ENABLE and return
-        if(offsetx < 0 || offsetx > this->size.x || offsety < 0 || offsety > this->size.y) 
+        if(offsetx < 0 || offsetx > this->size.x || offsety < 0 || offsety > this->size.y)
         {
             if(this->state == BT_HOVER) /// change color
             {
@@ -103,6 +117,7 @@ void Button::move(int rx, int ry)
      this->rect.setPosition(pos.x, pos.y);
      this->position = pos;
 }
+
 void Button::operator=(const Button & b){
     /// text config
     this->text = b.text;
@@ -111,7 +126,7 @@ void Button::operator=(const Button & b){
     this->position = b.position;
     this->size = b.size;
     this->state = b.state;
-    
+
 }
 
 

@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include "../include/button.hpp"
+#include "../include/menu.hpp"
 #include <random>
 #include <cmath>
 #include <string>
@@ -34,7 +35,7 @@ void exit_game(){
     //creating label
     sf::Text text;
     text.setFont(font);
-    text.setFillColor(sf::Color::White);
+    text.setColor(sf::Color::White);
     text.setCharacterSize(20);
     text.setPosition(w_width/5, 10);
     text.setString("Deseja Realmente Sair?");
@@ -58,7 +59,7 @@ void exit_game(){
     }
 }
 void comprar_soldado_window_exit(){
-     window_c_soldado.close();
+     //window_c_soldado.setActive();
 }
 void comprar_soldado_window(){
     int w_width = 350;
@@ -77,7 +78,7 @@ void comprar_soldado_window(){
     //creating label
     sf::Text text;
     text.setFont(font);
-    text.setFillColor(sf::Color::White);
+    text.setColor(sf::Color::White);
     text.setCharacterSize(20);
     text.setPosition(10, 10);
     text.setString("Digite a quantidade de soldados :");
@@ -86,7 +87,7 @@ void comprar_soldado_window(){
     sf::String playerInput;
     sf::Text qtd_soldado;
     qtd_soldado.setFont(font);
-    qtd_soldado.setFillColor(sf::Color::White);
+    qtd_soldado.setColor(sf::Color::White);
     qtd_soldado.setCharacterSize(20);
     qtd_soldado.setPosition(w_width/2, w_height/4);
 
@@ -123,9 +124,9 @@ void comprar_soldado_window(){
         window_c_soldado.display();
     }
 
-    std::string s = qtd_soldado.getString();
+    /*std::string s = qtd_soldado.getString();
     qtd_soldados_comprados = stoi(s);
-    std::cout << s << std::endl;
+    std::cout << s << std::endl;*/
 }
 void start_game(){
     game_window_open = true;
@@ -160,7 +161,7 @@ void start_game(){
     Button c_soldado("Comprar Soldados", sf::Vector2f(20, 490), 35, comprar_soldado_window, sf::Color(10, 0, 0));
     //c_soldado.move(20, 460);
 
-    //painel de informações
+    //painel de informaÃ§Ãµes
     //painel
     sf::RectangleShape painel_info;
     painel_info.setSize(sf::Vector2f(370, 610));
@@ -169,51 +170,59 @@ void start_game(){
     //labels
     sf::Text text_info;
     text_info.setFont(font);
-    text_info.setFillColor(sf::Color::White);
+    text_info.setColor(sf::Color::White);
     text_info.setCharacterSize(30);
     text_info.setPosition(440, 20);
     text_info.setString("Informacoes :");
-    //civilização
+    //civilizaÃ§Ã£o
     sf::Text text_civ_name;
     text_civ_name.setFont(font);
-    text_civ_name.setFillColor(sf::Color::White);
+    text_civ_name.setColor(sf::Color::White);
     text_civ_name.setCharacterSize(20);
     text_civ_name.setPosition(440, 80);
     text_civ_name.setString("Civilizacao :");
     //rei
     sf::Text text_rei_name;
     text_rei_name.setFont(font);
-    text_rei_name.setFillColor(sf::Color::White);
+    text_rei_name.setColor(sf::Color::White);
     text_rei_name.setCharacterSize(20);
     text_rei_name.setPosition(440, 120);
     text_rei_name.setString("Rei :");
     //QTD ouro
     sf::Text text_qtd_ouro;
     text_qtd_ouro.setFont(font);
-    text_qtd_ouro.setFillColor(sf::Color::White);
+    text_qtd_ouro.setColor(sf::Color::White);
     text_qtd_ouro.setCharacterSize(20);
     text_qtd_ouro.setPosition(440, 160);
     text_qtd_ouro.setString("Quantidade de ouro :");
     //QTD exercitos
     sf::Text text_qtd_exer;
     text_qtd_exer.setFont(font);
-    text_qtd_exer.setFillColor(sf::Color::White);
+    text_qtd_exer.setColor(sf::Color::White);
     text_qtd_exer.setCharacterSize(20);
     text_qtd_exer.setPosition(440, 200);
     text_qtd_exer.setString("Quantidade de exercitos :");
 
     sf::Text text_qtd_exer_var;
     text_qtd_exer_var.setFont(font);
-    text_qtd_exer_var.setFillColor(sf::Color::White);
+    text_qtd_exer_var.setColor(sf::Color::White);
     text_qtd_exer_var.setCharacterSize(20);
     text_qtd_exer_var.setPosition(700, 200);
 
     //botoes
     Button sair("Sair", sf::Vector2f(480, 580), 30, exit_game, sf::Color(200, 0, 0));
 
+    //teste de tamanho de botao
+    Button terras[8][8];
+    for(int i=0;i<8;i++){
+        for(int j=0;j<8;j++){
+            terras[i][j].startTerrasBotton(sf::Vector2f(6+i*50, 11+j*50), 47, exit_game, sf::Color(107, 142, 35));
+        }
+    }
     //game window music music
     sf::Music music;
-    if(!music.openFromFile("sound/sound.ogg"))
+    music.setLoop(true);
+    if(!music.openFromFile("sound/Fantascape.ogg"))
         std::_Exit(EXIT_FAILURE); // error
     music.play();
 
@@ -230,6 +239,11 @@ void start_game(){
             mover.update(event);
             c_soldado.update(event);
             sair.update(event);
+            for(int i=0;i<8;i++){
+                for(int j=0;j<8;j++){
+                    terras[i][j].update(event);
+                }
+            }
         }
         renderWindow.clear(color);
         //renderWindow.draw(text);
@@ -249,13 +263,73 @@ void start_game(){
         text_qtd_exer_var.setString(std::to_string((int)(qtd_soldados_comprados/10)));
         renderWindow.draw(text_qtd_exer_var);
         renderWindow.draw(sair);
+        for(int i=0;i<8;i++){
+            for(int j=0;j<8;j++){
+                renderWindow.draw(terras[i][j]);
+            }
+        }
 
         renderWindow.display();
     }
 
 
 }
+void menu(){
+    sf::RenderWindow window(sf::VideoMode(800, 600), "joguinho!");
+    Menu menu(window.getSize().x,window.getSize().y);
+    //load background
+    sf::Texture texture;
+    if (!texture.loadFromFile("sprites/bg.png")){
+    }
+    sf::Sprite background(texture);
+
+    //load music theme menu
+    sf::Music music;
+    if(!music.openFromFile("sound/sound.ogg"))
+        std::_Exit(EXIT_FAILURE); // error
+    music.play();
+    music.setLoop(true);
+    while (window.isOpen()){
+        sf::Event event;
+        while (window.pollEvent(event)){
+            if (event.type == sf::Event::Closed){
+                window.close();
+            }
+            if (event.type == sf::Event::KeyReleased){
+                switch(event.key.code){
+                    case sf::Keyboard::Up:
+                        menu.moveUp();
+                        break;
+                    case sf::Keyboard::Down:
+                        menu.moveDown();
+                        break;
+                    case sf::Keyboard::Enter:
+                        switch(menu.getSelectionItemIndex()){
+                            case 0:
+                                window.close();
+                                music.stop();
+                                start_game();
+                                break;
+                            case 1:
+                                break;
+                            case 2:
+                                window.close();
+                                music.stop();
+                                break;
+                        }
+                        break;
+                }
+            }
+        }
+
+        window.clear();
+        window.draw(background);
+        menu.draw(window);
+        window.display();
+    }
+}
 int main(){
+    menu();
     start_game();
     /*int w_width = 370;
     int w_height = 200;
