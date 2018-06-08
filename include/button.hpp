@@ -28,7 +28,7 @@ public:
     /*! relative move
     * \param rx x_axis difference of old and new position
     * \param ry y_axis difference of old and new position
-    */ 
+    */
     void move(int rx, int ry);
     /// update state
     void update(sf::Event& e);
@@ -57,3 +57,4 @@ private:
     BT_STATE state;
 };
 #endif
+

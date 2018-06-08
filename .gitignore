@@ -1,4 +1,5 @@
-# Created by https://www.gitignore.io/api/c++,visualstudiocode
+
+# Created by https://www.gitignore.io/api/c++,codeblocks,visualstudiocode
 
 ### C++ ###
 # Prerequisites
@@ -34,6 +35,15 @@
 *.out
 *.app
 
+### CodeBlocks ###
+# specific to CodeBlocks IDE
+*.layout
+*.depend
+
+# generated directories
+bin/
+obj/
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json
@@ -43,4 +53,4 @@
 .history
 
 
-# End of https://www.gitignore.io/api/c++,visualstudiocode
+# End of https://www.gitignore.io/api/c++,codeblocks,visualstudiocode
