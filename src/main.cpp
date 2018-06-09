@@ -16,7 +16,7 @@ int qtd_soldados_comprados = 0;
 
 void quit_game(){
     renderWindow.close();
-    system("exit");
+    std::_Exit(EXIT_FAILURE);
 }
 
 void exit_game(){
@@ -59,7 +59,7 @@ void exit_game(){
     }
 }
 void comprar_soldado_window_exit(){
-     //window_c_soldado.setActive();
+     window_c_soldado.close();
 }
 void comprar_soldado_window(){
     int w_width = 350;
@@ -124,9 +124,9 @@ void comprar_soldado_window(){
         window_c_soldado.display();
     }
 
-    /*std::string s = qtd_soldado.getString();
+    std::string s = qtd_soldado.getString();
     qtd_soldados_comprados = stoi(s);
-    std::cout << s << std::endl;*/
+    std::cout << s << std::endl;
 }
 void start_game(){
     game_window_open = true;
