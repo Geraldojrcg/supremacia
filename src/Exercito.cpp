@@ -8,7 +8,7 @@ Exercito::Exercito(int x,int y){
 	adicionarSoldado(s);
 }
 int Exercito::qtdDeSoldados(){
-	//return soldados.size();
+	//return soldados.size();//TODO: isso ta dando segmatation fault nao sei pq
 	return 1;
 }
 void Exercito::adicionarSoldado(Soldado *newSoldado){

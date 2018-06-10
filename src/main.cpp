@@ -271,8 +271,6 @@ void terras_options(int i,int j){
     }
 }
 void deslocarExercito(int i,int j){
-    std::cout<<i<<"<O>"<<std::endl;
-    std::cout<<mapa[i][j].endereco->qtdDeSoldados()<<"<>"<<std::endl;
     mapa[i][j].colocarExercito(lastReferencia,1);
     terras[i][j].changeColor(sf::Color(0, 0, 255));
     for(int k=0;k<8;k++){
@@ -301,28 +299,28 @@ void Mover(int i,int j){
     //botoes
     Button move[8];
     if(((j-1)>-1 && (j-1)<8)&&((i-1)>-1 && (i-1) <8)){
-        move[0].startTerrasBotton(sf::Vector2f(0, 0), 100, deslocarExercito,j-1,i-1, sf::Color(0, 0, 0));
+        move[0].startTerrasBotton(sf::Vector2f(0, 0), 100, deslocarExercito,i-1,j-1, sf::Color(0, 0, 0));
     }
     if(((j-1)>-1 && (j-1)<8)&&(i>-1 && i <8)){
-        move[1].startTerrasBotton(sf::Vector2f(100, 0), 100, deslocarExercito,j-1,i, sf::Color(0, 0, 0));
+        move[1].startTerrasBotton(sf::Vector2f(100, 0), 100, deslocarExercito,i-1,j, sf::Color(0, 0, 0));
     }
     if(((j-1)>-1 && (j-1)<8)&&((i+1)>-1 && (i+1) <8)){
-        move[2].startTerrasBotton(sf::Vector2f(200, 0), 100, deslocarExercito,j-1,i+1, sf::Color(0, 0, 0));
+        move[2].startTerrasBotton(sf::Vector2f(200, 0), 100, deslocarExercito,i-1,j+1, sf::Color(0, 0, 0));
     }
     if(((j)>-1 && (j)<8)&&((i-1)>-1 && (i-1) <8)){
-        move[3].startTerrasBotton(sf::Vector2f(0, 101), 100, deslocarExercito,j,i-1, sf::Color(0, 0, 0));
+        move[3].startTerrasBotton(sf::Vector2f(0, 101), 100, deslocarExercito,i,j-1, sf::Color(0, 0, 0));
     }
     if(((j)>-1 && (i)<8)&&((i+1)>-1 && (i+1) <8)){
-        move[4].startTerrasBotton(sf::Vector2f(200, 101), 100, deslocarExercito,j,i+1, sf::Color(0, 0, 0));
+        move[4].startTerrasBotton(sf::Vector2f(200, 101), 100, deslocarExercito,i,j+1, sf::Color(0, 0, 0));
     }
     if(((j+1)>-1 && (j+1)<8)&&((i-1)>-1 && (i-1) <8)){
-        move[5].startTerrasBotton(sf::Vector2f(0, 201), 100, deslocarExercito,(j+1),(i-1), sf::Color(0, 0, 0));
+        move[5].startTerrasBotton(sf::Vector2f(0, 201), 100, deslocarExercito,(i+1),(j-1), sf::Color(0, 0, 0));
     }
     if(((j+1)>-1 && (j+1)<8)&&((i)>-1 && (i) <8)){
-        move[6].startTerrasBotton(sf::Vector2f(100, 202), 100, deslocarExercito,(j+1),(i), sf::Color(0, 0, 0));
+        move[6].startTerrasBotton(sf::Vector2f(100, 202), 100, deslocarExercito,(i+1),(j), sf::Color(0, 0, 0));
     }
     if(((j+1)>-1 && (j+1)<8)&&((i+1)>-1 && (i+1) <8)){
-        move[7].startTerrasBotton(sf::Vector2f(200, 202), 100, deslocarExercito,(j+1),(i+1), sf::Color(0, 0, 0));
+        move[7].startTerrasBotton(sf::Vector2f(200, 202), 100, deslocarExercito,(i+1),(j+1), sf::Color(0, 0, 0));
     }
     
     sf::Font font;
@@ -629,6 +627,7 @@ int main(){
     CivilPlayer.setId(1);
     mapa[0][7].setDono(1);
     mapa[0][7].addExercito(CivilPlayer,0,7);
+     mapa[5][5].addExercito(CivilPlayer,5,5);
 
     menu();
     return 0;
