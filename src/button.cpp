@@ -7,8 +7,7 @@
  * \param on_press fuction that will be called whe button is pressed
  * \param default_color background button color
  */
-Button::Button(std::string textstr, const sf::Vector2f &position, size_t height, void (*on_press)(), sf::Color default_color)
-{
+Button::Button(std::string textstr, const sf::Vector2f &position, size_t height, void (*on_press)(), sf::Color default_color){
 
     /// text config
     this->font.loadFromFile("font/arial.ttf");
@@ -28,8 +27,31 @@ Button::Button(std::string textstr, const sf::Vector2f &position, size_t height,
     this->state = BT_ENABLE;
     this->on_press = on_press;
 }
+Button::Button(std::string textstr, const sf::Vector2f &position, size_t height, void (*on_press2)(int,int),int i,int j, sf::Color default_color){
+    /// text config
+    this->font.loadFromFile("font/arial.ttf");
+    this->text.setFont(this->font);
+    this->text.setColor(sf::Color::White);
+    this->text.setCharacterSize(height*0.8);
+    this->text.setPosition(position.x+0.5*height, position.y-0.05*height);
+    this->text.setString(textstr);
+    /// rectangle config
+    sf::FloatRect frect = text.getGlobalBounds();
+    this->size = sf::Vector2f(frect.width + height, height);
+    this->rect.setSize(this->size);
+    this->position = position;
+    this->rect.setPosition(position);
+    this->rect.setFillColor(default_color);
+    /// others configs
+    this->state = BT_ENABLE;
+    this->on_press2 = on_press2;
+    this->type=1;
+    this->setPositionX(i);
+    this->setPositionY(j);
+}
+
 //inicializador de botao terras de territorio
-void Button::startTerrasBotton(const sf::Vector2f &position, size_t height, void (*on_press)(), sf::Color default_color){
+void Button::startTerrasBotton(const sf::Vector2f &position, size_t height, void (*on_press2)(int,int),int x,int y, sf::Color default_color){
     /// rectangle config
     sf::FloatRect frect = text.getGlobalBounds();
     this->size = sf::Vector2f(height, height);
@@ -39,7 +61,15 @@ void Button::startTerrasBotton(const sf::Vector2f &position, size_t height, void
     this->rect.setFillColor(default_color);
     /// others configs
     this->state = BT_ENABLE;
-    this->on_press = on_press;
+    this->on_press2 = on_press2;
+
+    this->type=1;
+    this->setPositionX(x);
+    this->setPositionY(y);
+}
+//mudar cor
+void Button::changeColor(sf::Color default_color){
+    this->rect.setFillColor(default_color);
 }
 
 /// draw methode of Button. Check the SFML Documentation
@@ -60,7 +90,12 @@ unsigned int Button::getRightX()
 void Button::press()
 {
     // TODO::change button color
-    this->on_press();
+    if(this->type==1){
+        on_press2(this->getPositionX(),this->getPositionY());
+    }else{
+        this->on_press();
+    }
+    
 }
 /// update state
 void Button::update(sf::Event& e)
@@ -101,6 +136,7 @@ void Button::update(sf::Event& e)
         offset = e.mouseButton.y - this->position.y;
         if(offset < 0 || offset > this->size.y)return;
         this->press();
+    
     }
 }
 /// relative move

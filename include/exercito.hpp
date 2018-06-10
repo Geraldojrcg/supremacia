@@ -7,10 +7,13 @@
 
 class Exercito{
 private:
-	std::list<Soldado> soldados;
+	std::list<Soldado*> soldados;
 	int posicao[2];
 public:
 	Exercito(int x,int y);
+	int qtdDeSoldados();
+	void adicionarSoldado(Soldado *newSoldado);
+	void removerSoldado();
 };
 
 #endif
