@@ -4,14 +4,13 @@
 #include <iostream>
 #include <list>
 #include "exercito.hpp"
-#include "territorio.hpp"
 class Civilizacao{
 private:
 	std::string rei;// nome do rei(definido pelo jogador, username).
 	std::list<Exercito*> exercitos;//lista contendo os exercitos do jogador
-	std::list<Territorio*> Mapa;//lista contendo as infos dos territorios
 	int ouro;//quantida de ouro da cavilizacao
 	int soldadosLivres;
+	int id=0;//1 for player,other for cpu, zero for void
 public:
 	Civilizacao();
 	Civilizacao(std::string userName);
@@ -22,8 +21,11 @@ public:
 	void addOuro(int quantidade_de_ouro);
 	int getSoldadosLivres();
 	void addSoldado(int qtd);
+	void setId(int id);
+	int getId();
 	//exercito
 	void adicionarExercito(Exercito *newExercito);
+	void removerExercito(Exercito *exercito);
 
 };
 #endif

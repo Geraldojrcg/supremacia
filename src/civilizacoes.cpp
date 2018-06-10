@@ -22,6 +22,13 @@ int Civilizacao::getOuro(){
 void Civilizacao::addOuro(int quantidade_de_ouro){
 	ouro+=quantidade_de_ouro;
 }
+void Civilizacao::setId(int id){
+	this->id=id;
+}
+int Civilizacao::getId(){
+	return id;
+}
+
 void Civilizacao::adicionarExercito(Exercito *newExercito){
 	exercitos.push_back(newExercito);
 }
@@ -30,4 +37,7 @@ int Civilizacao::getSoldadosLivres(){
 }
 void Civilizacao::addSoldado(int qtd){
 	soldadosLivres+=qtd;
+}
+void Civilizacao::removerExercito(Exercito *exercito){
+	exercitos.remove(exercito);
 }

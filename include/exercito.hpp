@@ -10,6 +10,7 @@ private:
 	std::list<Soldado*> soldados;
 	int posicao[2];
 public:
+	Exercito()=default;
 	Exercito(int x,int y);
 	int qtdDeSoldados();
 	void adicionarSoldado(Soldado *newSoldado);

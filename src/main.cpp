@@ -15,9 +15,10 @@ sf::RenderWindow window_c_soldado;
 sf::RenderWindow window;
 sf::RenderWindow infos;
 sf::RenderWindow Exercito_options;
+sf::RenderWindow Terras_options;
 
 //matriz de botoes
-
+Exercito *lastReferencia;
 Button terras[8][8];
 //initiaze civilization
 Civilizacao CivilPlayer;
@@ -33,6 +34,7 @@ sf::Music music;
 void start_game();
 void initializing_player_infos();
 void initializing_player_infos_exit();
+void Mover(int i,int j);
 
 void quit_game(){
     renderWindow.close();
@@ -177,24 +179,26 @@ void comprar_soldado_window(){
 }
 void add_exercito(int i,int j){
     if((i==0 && j == 6)||(i==1 && j == 6)||(i==1 && j == 7)){
+        mapa[i][j].addExercito(CivilPlayer,i,j);
         terras[i][j].changeColor(sf::Color(0, 0, 255));
     }else{
         //TODO:avisar que nao pode adicionar
     }
 }
-void terras_options(int i,int j){
+void add_soldado(int i,int j){
+    
+}
+void exercito_options(int i,int j){
     int w_width = 350;
     int w_height = 200;
-
-    Exercito_options.create(sf::VideoMode(w_width, w_height), "terreno", sf::Style::Titlebar + sf::Style::Close);
+    Exercito_options.create(sf::VideoMode(w_width, w_height), "Exercito", sf::Style::Titlebar + sf::Style::Close);
 
     //botoes
     std::string test;
     test=std::to_string(qtd_soldados_comprados);
-    Button adicionar("adicionar", sf::Vector2f(50, 50), 30, add_exercito,i,j, sf::Color(200, 0, 0));
-    Button voltar("voltar", sf::Vector2f(50, w_height/2), 30, comprar_soldado_window_exit, sf::Color(200, 0, 0));
-
-
+    Button adicionar("adicionar soldado", sf::Vector2f(50, 50), 30, add_soldado,i,j, sf::Color(200, 0, 0));
+    Button mover("mover exercito", sf::Vector2f(50, 100), 30, Mover,i,j, sf::Color(200, 0, 0));
+    Button voltar("voltar", sf::Vector2f(50, 150), 30, comprar_soldado_window_exit, sf::Color(200, 0, 0));
 
     sf::Font font;
     font.loadFromFile("font/arial.ttf");
@@ -210,50 +214,119 @@ void terras_options(int i,int j){
                 Exercito_options.close();
             }
             Exercito_options.clear();
-            voltar.update(event);
+            mover.update(event);
             adicionar.update(event);
+            voltar.update(event);
         }
 
         Exercito_options.clear();
-        Exercito_options.draw(voltar);
+        Exercito_options.draw(mover);
         Exercito_options.draw(adicionar);
+        Exercito_options.draw(voltar);
         Exercito_options.display();
 
     }
 }
-void Move(){
-    int w_width = 400;
-    int w_height = 400;
-
-    infos.create(sf::VideoMode(w_width, w_height), "Exercito", sf::Style::Titlebar + sf::Style::Close);
-    /*sf::RectangleShape rectangle;
-    rectangle.setSize(sf::Vector2f(w_width,w_height));
-    rectangle.setFillColor(sf::Color(250,250,250));
-    rectangle.setPosition(0,0);*/
+void terras_options(int i,int j){
+    int w_width = 350;
+    int w_height = 200;
+    if(mapa[i][j].Ocupado()){
+        //TODO:se ocupado mudar menu
+        exercito_options(i,j);
+        return;
+    }
+    Terras_options.create(sf::VideoMode(w_width, w_height), "terreno", sf::Style::Titlebar + sf::Style::Close);
 
     //botoes
-    Button fechar("CONFIRMAR", sf::Vector2f(100, w_height/2), 30, initializing_player_infos_exit, sf::Color(200, 0, 0));
+    std::string test;
+    test=std::to_string(qtd_soldados_comprados);
+    Button adicionar("Colocar exercito", sf::Vector2f(50, 50), 30, add_exercito,i,j, sf::Color(200, 0, 0));
+    Button voltar("voltar", sf::Vector2f(50, w_height/2), 30, comprar_soldado_window_exit, sf::Color(200, 0, 0));
+
 
 
     sf::Font font;
     font.loadFromFile("font/arial.ttf");
 
-    //creating label
-    sf::Text text;
-    text.setFont(font);
-    text.setColor(sf::Color::White);
-    text.setCharacterSize(20);
-    text.setPosition(10, 10);
-    text.setString("digite o seu nome : ");
 
-    //input
-    sf::String playerInput;
-    sf::Text qtd_soldado;
-    qtd_soldado.setFont(font);
-    qtd_soldado.setColor(sf::Color::White);
-    qtd_soldado.setCharacterSize(20);
-    qtd_soldado.setPosition(w_width/2, w_height/4);
+    while (Terras_options.isOpen() && renderWindow.isOpen()){
+        //initializing event
+        sf::Event event;
+        // Check for all the events that occured since the last frame.
+        while (Terras_options.pollEvent(event)){
+            //Handle events here
+            if (event.type == sf::Event::Closed){
+                Terras_options.close();
+            }
+            Terras_options.clear();
+            voltar.update(event);
+            adicionar.update(event);
+        }
 
+        Terras_options.clear();
+        Terras_options.draw(voltar);
+        Terras_options.draw(adicionar);
+        Terras_options.display();
+
+    }
+}
+void deslocarExercito(int i,int j){
+    std::cout<<i<<"<O>"<<std::endl;
+    std::cout<<mapa[i][j].endereco->qtdDeSoldados()<<"<>"<<std::endl;
+    mapa[i][j].colocarExercito(lastReferencia,1);
+    terras[i][j].changeColor(sf::Color(0, 0, 255));
+    for(int k=0;k<8;k++){
+        for(int l=0;l<8;l++){
+            std::cout<<mapa[k][l].Ocupado()<<" ";
+        }
+        std::cout<<std::endl;
+    }
+}
+void Mover(int i,int j){
+    int w_width = 306;
+    int w_height = 306;
+    lastReferencia=mapa[i][j].getEndereco();
+    terras[i][j].changeColor(sf::Color(0, 128, 128));
+    mapa[i][j].desocupar();
+    infos.create(sf::VideoMode(w_width, w_height), "MOVER", sf::Style::Titlebar + sf::Style::Close);
+    /*sf::RectangleShape rectangle;
+    rectangle.setSize(sf::Vector2f(w_width,w_height));
+    rectangle.setFillColor(sf::Color(250,250,250));
+    rectangle.setPosition(0,0);*/
+    //load background
+    sf::Texture texture;
+    if (!texture.loadFromFile("sprites/MOVE.png")){
+    }
+    sf::Sprite background(texture);
+    //botoes
+    Button move[8];
+    if(((j-1)>-1 && (j-1)<8)&&((i-1)>-1 && (i-1) <8)){
+        move[0].startTerrasBotton(sf::Vector2f(0, 0), 100, deslocarExercito,j-1,i-1, sf::Color(0, 0, 0));
+    }
+    if(((j-1)>-1 && (j-1)<8)&&(i>-1 && i <8)){
+        move[1].startTerrasBotton(sf::Vector2f(100, 0), 100, deslocarExercito,j-1,i, sf::Color(0, 0, 0));
+    }
+    if(((j-1)>-1 && (j-1)<8)&&((i+1)>-1 && (i+1) <8)){
+        move[2].startTerrasBotton(sf::Vector2f(200, 0), 100, deslocarExercito,j-1,i+1, sf::Color(0, 0, 0));
+    }
+    if(((j)>-1 && (j)<8)&&((i-1)>-1 && (i-1) <8)){
+        move[3].startTerrasBotton(sf::Vector2f(0, 101), 100, deslocarExercito,j,i-1, sf::Color(0, 0, 0));
+    }
+    if(((j)>-1 && (i)<8)&&((i+1)>-1 && (i+1) <8)){
+        move[4].startTerrasBotton(sf::Vector2f(200, 101), 100, deslocarExercito,j,i+1, sf::Color(0, 0, 0));
+    }
+    if(((j+1)>-1 && (j+1)<8)&&((i-1)>-1 && (i-1) <8)){
+        move[5].startTerrasBotton(sf::Vector2f(0, 201), 100, deslocarExercito,(j+1),(i-1), sf::Color(0, 0, 0));
+    }
+    if(((j+1)>-1 && (j+1)<8)&&((i)>-1 && (i) <8)){
+        move[6].startTerrasBotton(sf::Vector2f(100, 202), 100, deslocarExercito,(j+1),(i), sf::Color(0, 0, 0));
+    }
+    if(((j+1)>-1 && (j+1)<8)&&((i+1)>-1 && (i+1) <8)){
+        move[7].startTerrasBotton(sf::Vector2f(200, 202), 100, deslocarExercito,(j+1),(i+1), sf::Color(0, 0, 0));
+    }
+    
+    sf::Font font;
+    font.loadFromFile("font/arial.ttf");
 
     while (infos.isOpen()){
         //initializing event
@@ -264,33 +337,21 @@ void Move(){
             if (event.type == sf::Event::Closed){
                 infos.close();
             }
-            if (event.type == sf::Event::TextEntered)
-            {
-                if(event.text.unicode == '\b' && playerInput.getSize()>0) { // handle backspace explicitly
-                     playerInput.erase(playerInput.getSize() - 1, 1);
-                }
-                else{
-                        playerInput += static_cast<char>(event.text.unicode);
-                        qtd_soldado.setString(playerInput);
-                    }
+            //infos.clear();
+            for(int k=0;k<8;k++){
+                move[k].update(event);
             }
-            infos.clear();
-            fechar.update(event);
         }
 
         infos.clear();
-        //window_c_soldado.draw(rectangle);
-        infos.draw(text);
-        infos.draw(qtd_soldado);
-        infos.draw(fechar);
+        infos.draw(background);
+        for(int k=0;k<8;k++){
+            infos.draw(move[k]);
+        }
+        
         infos.display();
 
     }
-
-    std::string s = qtd_soldado.getString();
-    CivilPlayer.setRei(s);
-    infos.close();
-    start_game();
 }
 void teste(){
 }
@@ -322,7 +383,6 @@ void start_game(){
     painel_acoes.setFillColor(sf::Color(150,0,0));
     painel_acoes.setPosition(10, 420);
     //botoes
-    Button mover("Mover", sf::Vector2f(20, 440), 35, nullptr, sf::Color(10, 0, 0));
     //mover.move(20, 430);
     Button c_soldado("Comprar Soldados", sf::Vector2f(20, 490), 35, comprar_soldado_window, sf::Color(10, 0, 0));
     //c_soldado.move(20, 460);
@@ -399,7 +459,6 @@ void start_game(){
                 music.stop();
                 renderWindow.close();
             }
-            mover.update(event);
             c_soldado.update(event);
             sair.update(event);
             for(int i=0;i<8;i++){
@@ -414,7 +473,6 @@ void start_game(){
         renderWindow.draw(territorio);
         // render painel acoes
         renderWindow.draw(painel_acoes);
-        renderWindow.draw(mover);
         renderWindow.draw(c_soldado);
         // render painel info
         renderWindow.draw(painel_info);
@@ -566,47 +624,13 @@ int main(){
         mapa[i]=new Territorio[8];
     }
     Setposicoes();
+    ///DEFINIÇOES DO PLAYER
     //definindo player como dono da posicao (0,7) obs player=1, cpu =2
+    CivilPlayer.setId(1);
     mapa[0][7].setDono(1);
+    mapa[0][7].addExercito(CivilPlayer,0,7);
 
     menu();
-    //start_game();
-    /*int w_width = 370;
-    int w_height = 200;
-    sf::RenderWindow window_start(sf::VideoMode(w_width, w_height), "Supremacia Demo", sf::Style::Titlebar + sf::Style::Close);
-
-    Button start("Start", sf::Vector2f(w_height/2, w_height/2), 40, start_game, sf::Color(200, 0, 0));
-
-    sf::Font font;
-    font.loadFromFile("font/arial.ttf");
-
-    //creating label
-    sf::Text text;
-    text.setFont(font);
-    text.setFillColor(sf::Color::White);
-    text.setCharacterSize(20);
-    text.setPosition(10, 10);
-    text.setString("Supremacia - the game of stratege war");
-
-    while (window_start.isOpen()){
-        //initializing event
-        sf::Event event;
-        // Check for all the events that occured since the last frame.
-        while (window_start.pollEvent(event)){
-            //Handle events here
-            if (event.type == sf::Event::EventType::Closed){
-                window_start.close();
-            }
-            start.update(event);
-        }
-        if(game_window_open)
-            window_start.close();
-        window_start.clear();
-        //window_start.draw(rectangle);
-        window_start.draw(text);
-        window_start.draw(start);
-        window_start.display();
-    }*/
     return 0;
 }
 
