@@ -20,8 +20,8 @@ public:
 	int getDono();
 	void desocupar();
 	void colocarExercito(Exercito *exercito,int id);
-	void addExercito(Civilizacao & civil,int i,int j);
-	void destruirExercito(Civilizacao & civil);
+	void addExercito(Civilizacao *civil,int i,int j);
+	void destruirExercito();
 	~Territorio()=default;
 };
 

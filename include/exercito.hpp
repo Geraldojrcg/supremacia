@@ -12,6 +12,7 @@ private:
 public:
 	Exercito()=default;
 	Exercito(int x,int y);
+	~Exercito()=default;
 	int qtdDeSoldados();
 	void adicionarSoldado(Soldado *newSoldado);
 	void removerSoldado();

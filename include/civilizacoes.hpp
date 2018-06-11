@@ -7,7 +7,6 @@
 class Civilizacao{
 private:
 	std::string rei;// nome do rei(definido pelo jogador, username).
-	std::list<Exercito*> exercitos;//lista contendo os exercitos do jogador
 	int ouro;//quantida de ouro da cavilizacao
 	int soldadosLivres;
 	int id=0;//1 for player,other for cpu, zero for void
@@ -24,8 +23,6 @@ public:
 	void setId(int id);
 	int getId();
 	//exercito
-	void adicionarExercito(Exercito *newExercito);
-	void removerExercito(Exercito *exercito);
 
 };
 #endif

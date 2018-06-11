@@ -8,8 +8,8 @@ Exercito::Exercito(int x,int y){
 	adicionarSoldado(s);
 }
 int Exercito::qtdDeSoldados(){
-	//return soldados.size();//TODO: isso ta dando segmatation fault nao sei pq
-	return 1;
+	return soldados.size();//TODO: isso ta dando segmatation fault nao sei pq
+	//return 1;
 }
 void Exercito::adicionarSoldado(Soldado *newSoldado){
 	soldados.push_back(newSoldado);

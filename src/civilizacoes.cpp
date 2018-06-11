@@ -28,16 +28,9 @@ void Civilizacao::setId(int id){
 int Civilizacao::getId(){
 	return id;
 }
-
-void Civilizacao::adicionarExercito(Exercito *newExercito){
-	exercitos.push_back(newExercito);
-}
 int Civilizacao::getSoldadosLivres(){
 	return soldadosLivres;
 }
 void Civilizacao::addSoldado(int qtd){
 	soldadosLivres+=qtd;
-}
-void Civilizacao::removerExercito(Exercito *exercito){
-	exercitos.remove(exercito);
 }

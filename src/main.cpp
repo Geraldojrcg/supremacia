@@ -35,6 +35,9 @@ void start_game();
 void initializing_player_infos();
 void initializing_player_infos_exit();
 void Mover(int i,int j);
+void Mover_quit();
+void exercito_options_quit();
+void terras_options_quit();
 
 void quit_game(){
     renderWindow.close();
@@ -179,14 +182,20 @@ void comprar_soldado_window(){
 }
 void add_exercito(int i,int j){
     if((i==0 && j == 6)||(i==1 && j == 6)||(i==1 && j == 7)){
-        mapa[i][j].addExercito(CivilPlayer,i,j);
+        mapa[i][j].addExercito(&CivilPlayer,i,j);
         terras[i][j].changeColor(sf::Color(0, 0, 255));
     }else{
         //TODO:avisar que nao pode adicionar
     }
+    terras_options_quit();
 }
 void add_soldado(int i,int j){
+    if(){
+        Soldado *s=new Soldado();
+        mapa[i][j].endereco->adicionarSoldado(s);
+    }
     
+    std::cout<<mapa[i][j].endereco->qtdDeSoldados()<<std::endl;
 }
 void exercito_options(int i,int j){
     int w_width = 350;
@@ -198,7 +207,7 @@ void exercito_options(int i,int j){
     test=std::to_string(qtd_soldados_comprados);
     Button adicionar("adicionar soldado", sf::Vector2f(50, 50), 30, add_soldado,i,j, sf::Color(200, 0, 0));
     Button mover("mover exercito", sf::Vector2f(50, 100), 30, Mover,i,j, sf::Color(200, 0, 0));
-    Button voltar("voltar", sf::Vector2f(50, 150), 30, comprar_soldado_window_exit, sf::Color(200, 0, 0));
+    Button voltar("voltar", sf::Vector2f(50, 150), 30, exercito_options_quit, sf::Color(200, 0, 0));
 
     sf::Font font;
     font.loadFromFile("font/arial.ttf");
@@ -227,6 +236,12 @@ void exercito_options(int i,int j){
 
     }
 }
+void exercito_options_quit(){
+    Exercito_options.close();
+}
+void terras_options_quit(){
+    Terras_options.close();
+}
 void terras_options(int i,int j){
     int w_width = 350;
     int w_height = 200;
@@ -241,7 +256,7 @@ void terras_options(int i,int j){
     std::string test;
     test=std::to_string(qtd_soldados_comprados);
     Button adicionar("Colocar exercito", sf::Vector2f(50, 50), 30, add_exercito,i,j, sf::Color(200, 0, 0));
-    Button voltar("voltar", sf::Vector2f(50, w_height/2), 30, comprar_soldado_window_exit, sf::Color(200, 0, 0));
+    Button voltar("voltar", sf::Vector2f(50, w_height/2), 30, terras_options_quit, sf::Color(200, 0, 0));
 
 
 
@@ -279,6 +294,8 @@ void deslocarExercito(int i,int j){
         }
         std::cout<<std::endl;
     }
+    Mover_quit();
+    exercito_options_quit();
 }
 void Mover(int i,int j){
     int w_width = 306;
@@ -301,25 +318,25 @@ void Mover(int i,int j){
     if(((j-1)>-1 && (j-1)<8)&&((i-1)>-1 && (i-1) <8)){
         move[0].startTerrasBotton(sf::Vector2f(0, 0), 100, deslocarExercito,i-1,j-1, sf::Color(0, 0, 0));
     }
-    if(((j-1)>-1 && (j-1)<8)&&(i>-1 && i <8)){
+    if(((i-1)>-1 && (i-1)<8)&&(j>-1 && j <8)){
         move[1].startTerrasBotton(sf::Vector2f(100, 0), 100, deslocarExercito,i-1,j, sf::Color(0, 0, 0));
     }
-    if(((j-1)>-1 && (j-1)<8)&&((i+1)>-1 && (i+1) <8)){
+    if(((i-1)>-1 && (i-1)<8)&&((j+1)>-1 && (j+1) <8)){
         move[2].startTerrasBotton(sf::Vector2f(200, 0), 100, deslocarExercito,i-1,j+1, sf::Color(0, 0, 0));
     }
-    if(((j)>-1 && (j)<8)&&((i-1)>-1 && (i-1) <8)){
+    if(((i)>-1 && (i)<8)&&((j-1)>-1 && (j-1) <8)){
         move[3].startTerrasBotton(sf::Vector2f(0, 101), 100, deslocarExercito,i,j-1, sf::Color(0, 0, 0));
     }
-    if(((j)>-1 && (i)<8)&&((i+1)>-1 && (i+1) <8)){
+    if(((i)>-1 && (i)<8)&&((j+1)>-1 && (j+1) <8)){
         move[4].startTerrasBotton(sf::Vector2f(200, 101), 100, deslocarExercito,i,j+1, sf::Color(0, 0, 0));
     }
-    if(((j+1)>-1 && (j+1)<8)&&((i-1)>-1 && (i-1) <8)){
+    if(((i+1)>-1 && (i+1)<8)&&((j-1)>-1 && (j-1) <8)){
         move[5].startTerrasBotton(sf::Vector2f(0, 201), 100, deslocarExercito,(i+1),(j-1), sf::Color(0, 0, 0));
     }
-    if(((j+1)>-1 && (j+1)<8)&&((i)>-1 && (i) <8)){
+    if(((i+1)>-1 && (i+1)<8)&&((j)>-1 && (j) <8)){
         move[6].startTerrasBotton(sf::Vector2f(100, 202), 100, deslocarExercito,(i+1),(j), sf::Color(0, 0, 0));
     }
-    if(((j+1)>-1 && (j+1)<8)&&((i+1)>-1 && (i+1) <8)){
+    if(((i+1)>-1 && (i+1)<8)&&((j+1)>-1 && (j+1) <8)){
         move[7].startTerrasBotton(sf::Vector2f(200, 202), 100, deslocarExercito,(i+1),(j+1), sf::Color(0, 0, 0));
     }
     
@@ -350,6 +367,9 @@ void Mover(int i,int j){
         infos.display();
 
     }
+}
+void Mover_quit(){
+    infos.close();
 }
 void teste(){
 }
@@ -431,12 +451,12 @@ void start_game(){
     for(int i=0;i<8;i++){
         for(int j=0;j<8;j++){
             if(mapa[i][j].getDono()==1){
-                terras[i][j].startTerrasBotton(sf::Vector2f(6+i*50, 11+j*50), 47, terras_options,i,j, sf::Color(0, 0, 255));
+                terras[i][j].startTerrasBotton(sf::Vector2f(6+j*50, 11+i*50), 47, terras_options,i,j, sf::Color(0, 0, 255));
             }
             else if(mapa[i][j].getDono()==2){
-                terras[i][j].startTerrasBotton(sf::Vector2f(6+i*50, 11+j*50), 47, terras_options,i,j, sf::Color(255, 0, 0));
+                terras[i][j].startTerrasBotton(sf::Vector2f(6+j*50, 11+i*50), 47, terras_options,i,j, sf::Color(255, 0, 0));
             }else{
-                terras[i][j].startTerrasBotton(sf::Vector2f(6+i*50, 11+j*50), 47, terras_options,i,j, sf::Color(107, 142, 35));
+                terras[i][j].startTerrasBotton(sf::Vector2f(6+j*50, 11+i*50), 47, terras_options,i,j, sf::Color(107, 142, 35));
             }
         }
     }
@@ -626,8 +646,6 @@ int main(){
     //definindo player como dono da posicao (0,7) obs player=1, cpu =2
     CivilPlayer.setId(1);
     mapa[0][7].setDono(1);
-    mapa[0][7].addExercito(CivilPlayer,0,7);
-     mapa[5][5].addExercito(CivilPlayer,5,5);
 
     menu();
     return 0;
