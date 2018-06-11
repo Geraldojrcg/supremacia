@@ -26,6 +26,7 @@ Exercito *lastReferencia;
 Button terras[8][8];
 //initiaze civilization
 Civilizacao CivilPlayer;
+Civilizacao CivilIa;
 
 bool game_window_open = false;
 
@@ -33,7 +34,8 @@ int qtd_soldados_comprados = 0;
 
 //variavel bool alert sim ou nao
 bool alertB=false;
-
+//variavel que conta os movimentos do jogador
+int mana;
     //load music theme menu
 sf::Music music;
 
@@ -253,14 +255,16 @@ void alert_bool(int codigo){//window of alert with decision
 void add_exercito(int i,int j){//adiciona um novo exercito ao terreno
     alert_bool(0);
     if(alertB){
-        mapa[i][j].addExercito(&CivilPlayer,i,j);
+        mapa[i][j].addExercito(&CivilPlayer);
         terras[i][j].changeColor(sf::Color(0, 0, 255));
     }
     terras_options_quit();
 }
 void add_soldado(int i,int j){
+    srand(time(nullptr));
     if(CivilPlayer.getSoldadosLivres()>0){
         Soldado *s=new Soldado();
+        s->forca=(rand()%10)+3;
         mapa[i][j].endereco->adicionarSoldado(s);
         CivilPlayer.addSoldado(-1);
     }else{
@@ -269,7 +273,14 @@ void add_soldado(int i,int j){
     Exercito_options.close();
 }
 void coletar_ouro(int i,int j){
-    CivilPlayer.addOuro(mapa[i][j].getQtdDeOuro());
+    if(mapa[i][j].HaveOuro()){
+        mana--;
+        CivilPlayer.addOuro(mapa[i][j].getQtdDeOuro());
+    }else{
+        alert_window(3);//informar que nao possui mais ouro ali
+    }
+    
+    Exercito_options.close();
 }
 void exercito_options(int i,int j){
     int w_width = 350;
@@ -358,9 +369,13 @@ void terras_options(int i,int j){
     int w_width = 350;
     int w_height = 200;
     if(mapa[i][j].Ocupado()){
-        //TODO:se ocupado mudar menu
-        exercito_options(i,j);
-        return;
+        if(mapa[i][j].getDono()!=1){
+            alert_window(4);///codigo 4 avisa que um inimigo esta ali
+            return;
+        }else{
+            exercito_options(i,j);
+            return;
+        }
     }
     Terras_options.create(sf::VideoMode(w_width, w_height), "terreno", sf::Style::Titlebar + sf::Style::Close);
 
@@ -429,13 +444,49 @@ void terras_options(int i,int j){
     }
 }
 void deslocarExercito(int i,int j){
-    mapa[i][j].colocarExercito(lastReferencia,1);
-    terras[i][j].changeColor(sf::Color(0, 0, 255));
-    for(int k=0;k<8;k++){
-        for(int l=0;l<8;l++){
-            std::cout<<mapa[k][l].Ocupado()<<" ";
+    if(!mapa[i][j].Ocupado()){
+       mapa[i][j].colocarExercito(lastReferencia,1);
+       terras[i][j].changeColor(sf::Color(0, 0, 255));
+    }else{
+        //batalha
+        /**/
+        //verificar se o jogador é mais forte
+        if(lastReferencia->getForcaDoExercito()>mapa[i][j].endereco->getForcaDoExercito()){
+            //calcula a media de poder
+            int media;
+            int p=0;
+            media=lastReferencia->getForcaDoExercito()/lastReferencia->qtdDeSoldados();
+            for(Soldado* aux : lastReferencia->soldados){
+                std::cout<<"media"<<media<<std::endl;
+                std::cout<<"forca do soldado"<<aux->getForca()<<std::endl;
+                if(aux->getForca()<media){//verifica quais os soldados inferiores a media de poder
+                    lastReferencia->soldados.erase(lastReferencia->soldados.begin()+p);//remove os soldados fracos
+                std::cout<<"3"<<std::endl;
+                }
+                p++;
+            }
+            std::cout<<"4"<<std::endl;
+            delete mapa[i][j].endereco;//destroi o exercito da ia
+            std::cout<<"5"<<std::endl;
+            mapa[i][j].colocarExercito(lastReferencia,1);//set o territorio com seu exercito
+            terras[i][j].changeColor(sf::Color(0, 0, 255));//muda a cor do campo
+            std::cout<<"player win"<<std::endl;
+
         }
-        std::cout<<std::endl;
+        //verificar se a ia é mais forte
+        else if(lastReferencia->getForcaDoExercito()<mapa[i][j].endereco->getForcaDoExercito()){
+            //calcula a media de poder
+            int media;
+            media=mapa[i][j].endereco->getForcaDoExercito()/mapa[i][j].endereco->qtdDeSoldados();
+            for(Soldado* aux : mapa[i][j].endereco->soldados){
+                if(aux->getForca()<media){//verifica quais os soldados inferiores a media de poder
+                    mapa[i][j].endereco->removerSoldado(aux);
+                }
+            }
+            delete lastReferencia;
+            std::cout<<"IA win"<<std::endl;
+        }
+
     }
     Mover_quit();
     exercito_options_quit();
@@ -446,6 +497,7 @@ void Mover(int i,int j){
     lastReferencia=mapa[i][j].getEndereco();
     terras[i][j].changeColor(sf::Color(0, 128, 128));
     mapa[i][j].desocupar();
+    mana--;
     infos.create(sf::VideoMode(w_width, w_height), "MOVER", sf::Style::Titlebar + sf::Style::Close);
     /*sf::RectangleShape rectangle;
     rectangle.setSize(sf::Vector2f(w_width,w_height));
@@ -493,7 +545,7 @@ void Mover(int i,int j){
         while (infos.pollEvent(event)){
             //Handle events here
             if (event.type == sf::Event::Closed){
-                infos.close();
+                alert_window(2);//codigo 2 para falar que nao pode desistir de um movimento
             }
             //infos.clear();
             for(int k=0;k<8;k++){
@@ -522,6 +574,9 @@ void alert_window(int codigo){
     /*
     0 = soldados livres insuficiente para adicionar ao exercito
     1 = decisao falha ao comprar exercito
+    2 =  para falar que nao pode desistir de um movimento
+    3 = informar que nao possui mais ouro ali
+    4 = avisa que um inimigo esta ali
     */
     int w_width = 300;
     int w_height = 200;
@@ -536,13 +591,19 @@ void alert_window(int codigo){
     text.setFont(font);
     text.setColor(sf::Color::White);
     text.setCharacterSize(20);
-    text.setPosition(w_width/5, 10);
+    text.setPosition(1, 10);
     switch(codigo){
         case 0:
             text.setString("nenhum homem livre");
             break;
         case 1:
             text.setString("ouro insuficiente!!!");
+        case 2:
+            text.setString("Nao pode cancelar movimento");
+        case 3:
+            text.setString("Nao possui ouro nesse terreno");
+        case 4:
+            text.setString("terreno dominado por inimigo");
     }
     sf::Text text2;
     text2.setFont(font);
@@ -640,6 +701,15 @@ void start_game(){
     std::string sol;
     sol=std::to_string(CivilPlayer.getSoldadosLivres());
     text_sol_livre.setString("Soldados fora de combate  : "+sol);
+     //quantidade de movimentos restantes
+    sf::Text text_move;
+    text_move.setFont(font);
+    text_move.setColor(sf::Color::White);
+    text_move.setCharacterSize(20);
+    text_move.setPosition(440, 200);
+    std::string move;
+    move=std::to_string(mana);
+    text_move.setString("movimentos restantes  : "+move);
     //botoes
     Button sair("Sair", sf::Vector2f(480, 580), 30, exit_game, sf::Color(200, 0, 0));
 
@@ -662,7 +732,6 @@ void start_game(){
     if(!music.openFromFile("sound/Fantascape.ogg"))
         std::_Exit(EXIT_FAILURE); // error
     music.play();
-
     while (renderWindow.isOpen()){
         //initializing event
         sf::Event event;
@@ -681,19 +750,20 @@ void start_game(){
                 }
             }
         }
+        //verificação da mana do jogador para entrar no turno da ia
+        if(mana==0){
+            //entra no turno da ia
+        }
         renderWindow.clear(color);
-        //renderWindow.draw(text);
-        // render territorio
         renderWindow.draw(territorio);
-        // render painel acoes
         renderWindow.draw(painel_acoes);
         renderWindow.draw(c_soldado);
-        // render painel info
         renderWindow.draw(painel_info);
         renderWindow.draw(text_info);
         renderWindow.draw(text_rei_name);
         renderWindow.draw(text_qtd_ouro);
         renderWindow.draw(text_sol_livre);
+        renderWindow.draw(text_move);
         renderWindow.draw(sair);
         for(int i=0;i<8;i++){
             for(int j=0;j<8;j++){
@@ -706,6 +776,8 @@ void start_game(){
         sol=std::to_string(CivilPlayer.getSoldadosLivres());
         text_sol_livre.setString("Soldados fora de combate  : "+sol);
         renderWindow.display();
+        move=std::to_string(mana);
+        text_move.setString("Soldados fora de combate  : "+move);
 
     }
 
@@ -837,10 +909,15 @@ int main(){
         }
     }
     ///DEFINIÇOES DO PLAYER
+    //mana inicial 
+    mana=5;
     //definindo player como dono da posicao (0,7) obs player=1, cpu =2
     CivilPlayer.setId(1);
     mapa[0][0].setDono(1);
 
+    CivilIa.setId(2);
+    mapa[7][7].setDono(2);
+    mapa[2][2].addExercito(&CivilIa);
     menu();
     return 0;
 }

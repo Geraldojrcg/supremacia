@@ -1,9 +1,10 @@
 #include "../include/guerreiro.hpp"
 
-
+#include<stdlib.h>
+#include <time.h>
 
 Guerreiro::Guerreiro(){
+	srand(time(nullptr));
 	forca=15;
-	vida=100;
 	preco=10;
 }

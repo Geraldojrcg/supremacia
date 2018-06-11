@@ -7,15 +7,18 @@
 
 class Exercito{
 private:
-	std::list<Soldado*> soldados;
+	
 	int posicao[2];
+public:
+	std::list<Soldado*> soldados;//deu ruim sendo public
 public:
 	Exercito()=default;
 	Exercito(int x,int y);
 	~Exercito()=default;
 	int qtdDeSoldados();
+	int getForcaDoExercito();
 	void adicionarSoldado(Soldado *newSoldado);
-	void removerSoldado();
+	void removerSoldado(Soldado *soldado);
 };
 
 #endif

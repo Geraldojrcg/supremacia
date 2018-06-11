@@ -13,6 +13,13 @@ int Exercito::qtdDeSoldados(){
 void Exercito::adicionarSoldado(Soldado *newSoldado){
 	soldados.push_back(newSoldado);
 }
-void Exercito::removerSoldado(){
-	soldados.pop_back();
+void Exercito::removerSoldado(Soldado *soldado){
+	soldados.remove(soldado);
+}
+int Exercito::getForcaDoExercito(){
+	int strMax=0;
+	for(Soldado* aux : soldados){
+		strMax+=aux->getForca();
+	}
+	return strMax;
 }

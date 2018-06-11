@@ -40,7 +40,7 @@ void Territorio::colocarExercito(Exercito *exercito,int id){
 	this->dono=id;
 }
 //adiciona um novo exercito
-void Territorio::addExercito(Civilizacao *civil,int i,int j){
+void Territorio::addExercito(Civilizacao *civil){
 	Exercito *newExercito =new Exercito();
 	this->endereco=newExercito;
 	this->ocupado=true;
