@@ -6,18 +6,21 @@
 class Territorio{
 private:
 	int qtd_de_ouro;
+	bool tem_ouro=true;
 	int dono;
 	bool ocupado=false;
-	
-	int posicao[2];
 public:
 	Exercito *endereco; 
 	Territorio()=default;
 	Exercito *getEndereco();
-	void setPosicao(int x,int y);
+	void SetQtdOuro(int ouro);
 	bool Ocupado();
 	void setDono(int newDono);
 	int getDono();
+	int getQtdDeOuro();
+	void changeOuro();
+	bool HaveOuro();
+	//opcoes de exercito
 	void desocupar();
 	void colocarExercito(Exercito *exercito,int id);
 	void addExercito(Civilizacao *civil,int i,int j);

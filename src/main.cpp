@@ -6,6 +6,8 @@
 #include <random>
 #include <cmath>
 #include <string>
+#include <stdlib.h>
+#include <time.h>
 
 #include"civilizacoes.hpp"
 #include"global.hpp"
@@ -16,6 +18,8 @@ sf::RenderWindow window;
 sf::RenderWindow infos;
 sf::RenderWindow Exercito_options;
 sf::RenderWindow Terras_options;
+sf::RenderWindow alert;
+sf::RenderWindow Alert_bool;
 
 //matriz de botoes
 Exercito *lastReferencia;
@@ -26,6 +30,9 @@ Civilizacao CivilPlayer;
 bool game_window_open = false;
 
 int qtd_soldados_comprados = 0;
+
+//variavel bool alert sim ou nao
+bool alertB=false;
 
     //load music theme menu
 sf::Music music;
@@ -38,6 +45,8 @@ void Mover(int i,int j);
 void Mover_quit();
 void exercito_options_quit();
 void terras_options_quit();
+void alert_window(int codigo);
+void alert_quit();
 
 void quit_game(){
     renderWindow.close();
@@ -103,7 +112,7 @@ void comprar_soldado_window(){
     int w_width = 350;
     int w_height = 200;
 
-    window_c_soldado.create(sf::VideoMode(w_width, w_height), "Supremacia Demo", sf::Style::Titlebar + sf::Style::Close);
+    window_c_soldado.create(sf::VideoMode(w_width, w_height), "Comprar soldados", sf::Style::Titlebar + sf::Style::Close);
 
     //botoes
     std::string test;
@@ -180,40 +189,131 @@ void comprar_soldado_window(){
         text.setString(test2);
     }
 }
-void add_exercito(int i,int j){
-    if((i==0 && j == 6)||(i==1 && j == 6)||(i==1 && j == 7)){
+void alert_bool_yes(){
+    if(CivilPlayer.getOuro()>=100){
+        CivilPlayer.addOuro(-100);
+        alertB=true;
+    }else{
+        alert_window(1);//codigo 1 de decisao falha ao comprar exercito
+        alertB=false;
+    }
+    Alert_bool.close();
+}
+void alert_bool_no(){
+    alertB=false;
+    Alert_bool.close();
+}
+void alert_bool(int codigo){//window of alert with decision
+    //codigo é referente ao qual foi o porque do alerte, abaixo o tipos
+    /*
+    0 = adicionar exercito com o custo de 100 ouros
+    */
+    int w_width = 300;
+    int w_height = 200;
+    //botoes
+    Alert_bool.create(sf::VideoMode(w_width, w_height), "ALERT", sf::Style::Titlebar + sf::Style::Close);
+    Button sim("SIM", sf::Vector2f(10, w_height/2), 40, alert_bool_yes, sf::Color(200, 0, 0));
+    Button nao("NAO", sf::Vector2f(190, w_height/2), 40, alert_bool_no, sf::Color(200, 0, 0));
+
+    sf::Font font;
+    font.loadFromFile("font/arial.ttf");
+
+    //creating label
+    sf::Text text;
+    text.setFont(font);
+    text.setColor(sf::Color::White);
+    text.setCharacterSize(20);
+    text.setPosition(10, 10);
+    switch(codigo){
+        case 0:
+            text.setString("deseja adicionar \n exercito por \n 100 OUROS ?");
+            break;
+    }
+
+    while (Alert_bool.isOpen() && renderWindow.isOpen()){
+        //initializing event
+        sf::Event event;
+        // Check for all the events that occured since the last frame.
+        while (Alert_bool.pollEvent(event)){
+            //Handle events here
+            if (event.type == sf::Event::Closed){
+                alertB=false;
+                Alert_bool.close();
+            }
+            sim.update(event);
+            nao.update(event);
+        }
+        Alert_bool.clear();
+        Alert_bool.draw(text);
+        Alert_bool.draw(sim);
+        Alert_bool.draw(nao);
+        Alert_bool.display();
+    }
+}
+void add_exercito(int i,int j){//adiciona um novo exercito ao terreno
+    alert_bool(0);
+    if(alertB){
         mapa[i][j].addExercito(&CivilPlayer,i,j);
         terras[i][j].changeColor(sf::Color(0, 0, 255));
-    }else{
-        //TODO:avisar que nao pode adicionar
     }
     terras_options_quit();
 }
 void add_soldado(int i,int j){
-    if(){
+    if(CivilPlayer.getSoldadosLivres()>0){
         Soldado *s=new Soldado();
         mapa[i][j].endereco->adicionarSoldado(s);
+        CivilPlayer.addSoldado(-1);
+    }else{
+        alert_window(0);//chamando a janela de alert pelo codigo 0
     }
-    
-    std::cout<<mapa[i][j].endereco->qtdDeSoldados()<<std::endl;
+    Exercito_options.close();
+}
+void coletar_ouro(int i,int j){
+    CivilPlayer.addOuro(mapa[i][j].getQtdDeOuro());
 }
 void exercito_options(int i,int j){
     int w_width = 350;
-    int w_height = 200;
+    int w_height = 400;
     Exercito_options.create(sf::VideoMode(w_width, w_height), "Exercito", sf::Style::Titlebar + sf::Style::Close);
 
     //botoes
     std::string test;
     test=std::to_string(qtd_soldados_comprados);
-    Button adicionar("adicionar soldado", sf::Vector2f(50, 50), 30, add_soldado,i,j, sf::Color(200, 0, 0));
-    Button mover("mover exercito", sf::Vector2f(50, 100), 30, Mover,i,j, sf::Color(200, 0, 0));
-    Button voltar("voltar", sf::Vector2f(50, 150), 30, exercito_options_quit, sf::Color(200, 0, 0));
+    Button coletar("coletar ouro", sf::Vector2f(50, 200), 30, coletar_ouro,i,j, sf::Color(200, 0, 0));
+    Button adicionar("adicionar soldado", sf::Vector2f(50, 250), 30, add_soldado,i,j, sf::Color(200, 0, 0));
+    Button mover("mover exercito", sf::Vector2f(50, 300), 30, Mover,i,j, sf::Color(200, 0, 0));
+    Button voltar("voltar", sf::Vector2f(50, 350), 30, exercito_options_quit, sf::Color(200, 0, 0));
 
     sf::Font font;
     font.loadFromFile("font/arial.ttf");
 
+     //creating label
+    sf::Text text;
+    text.setFont(font);
+    text.setColor(sf::Color::White);
+    text.setCharacterSize(20);
+    text.setPosition(10, 10);
+    text.setString("Numero de soldados : ");
+    std::string numSold;
+
+
+    sf::Text text2;
+    text2.setFont(font);
+    text2.setColor(sf::Color::White);
+    text2.setCharacterSize(20);
+    text2.setPosition(10, 40);
+    std::string ouro;
+    if(mapa[i][j].HaveOuro()){
+        ouro="NAO";
+    }else{
+        ouro="SIM";
+    }
+    text2.setString("Ouro coletado : "+ouro);
+    
 
     while (Exercito_options.isOpen() && renderWindow.isOpen()){
+
+        numSold=std::to_string(mapa[i][j].endereco->qtdDeSoldados());
         //initializing event
         sf::Event event;
         // Check for all the events that occured since the last frame.
@@ -224,14 +324,26 @@ void exercito_options(int i,int j){
             }
             Exercito_options.clear();
             mover.update(event);
+            coletar.update(event);
             adicionar.update(event);
             voltar.update(event);
         }
 
         Exercito_options.clear();
         Exercito_options.draw(mover);
+        Exercito_options.draw(coletar);
         Exercito_options.draw(adicionar);
         Exercito_options.draw(voltar);
+        text.setString("Numero de soldados : "+numSold);
+        Exercito_options.draw(text);
+        //checa de a opcao ouro coletado mudou e atualiza
+        if(mapa[i][j].HaveOuro()){
+            ouro="NAO";
+        }else{
+            ouro="SIM";
+        }
+        text2.setString("Ouro coletado : "+ouro);
+        Exercito_options.draw(text2);
         Exercito_options.display();
 
     }
@@ -255,13 +367,30 @@ void terras_options(int i,int j){
     //botoes
     std::string test;
     test=std::to_string(qtd_soldados_comprados);
+    
+
     Button adicionar("Colocar exercito", sf::Vector2f(50, 50), 30, add_exercito,i,j, sf::Color(200, 0, 0));
+    
     Button voltar("voltar", sf::Vector2f(50, w_height/2), 30, terras_options_quit, sf::Color(200, 0, 0));
 
 
 
     sf::Font font;
     font.loadFromFile("font/arial.ttf");
+    //label
+    sf::Text text;
+    text.setFont(font);
+    text.setColor(sf::Color::White);
+    text.setCharacterSize(20);
+    text.setPosition(10, 10);
+    text.setString("Ouro coletado : ");
+    std::string ouro;
+    if(mapa[i][j].HaveOuro()){
+        ouro="NAO";
+    }else{
+        ouro="SIM";
+    }
+    text.setString("Ouro coletado : "+ouro);
 
 
     while (Terras_options.isOpen() && renderWindow.isOpen()){
@@ -275,12 +404,26 @@ void terras_options(int i,int j){
             }
             Terras_options.clear();
             voltar.update(event);
-            adicionar.update(event);
+            //VERIFICA SE A POSIÇAO É PROPICA PARA COLOCAR EXERCITO, SOMENTE POSICOES PROXIMAS AO CASTELO PODEM SER ADICIONADAS EXERCITOS
+            if((i==0 && j == 1)||(i==1 && j == 1)||(i==1 && j == 0)){
+                adicionar.update(event);
+            }   
+            
         }
 
         Terras_options.clear();
         Terras_options.draw(voltar);
-        Terras_options.draw(adicionar);
+        //VERIFICA SE A POSIÇAO É PROPICA PARA COLOCAR EXERCITO, SOMENTE POSICOES PROXIMAS AO CASTELO PODEM SER ADICIONADAS EXERCITOS
+        if((i==0 && j == 1)||(i==1 && j == 1)||(i==1 && j == 0)){
+            Terras_options.draw(adicionar);
+        }//atualiza se terreno tem ou nao ouro
+        if(mapa[i][j].HaveOuro()){
+            ouro="NAO";
+        }else{
+            ouro="SIM";
+        }
+        text.setString("Ouro coletado : "+ouro);
+        Terras_options.draw(text);
         Terras_options.display();
 
     }
@@ -371,7 +514,60 @@ void Mover(int i,int j){
 void Mover_quit(){
     infos.close();
 }
-void teste(){
+void alert_quit(){
+    alert.close();
+}
+void alert_window(int codigo){
+    //codigo é referente ao qual foi o porque do alerte, abaixo o tipos
+    /*
+    0 = soldados livres insuficiente para adicionar ao exercito
+    1 = decisao falha ao comprar exercito
+    */
+    int w_width = 300;
+    int w_height = 200;
+    alert.create(sf::VideoMode(w_width, w_height), "ALERT", sf::Style::Titlebar + sf::Style::Close);
+    Button sair(" OK ", sf::Vector2f(w_height/2, w_height/2), 40, alert_quit, sf::Color(200, 0, 0));
+
+    sf::Font font;
+    font.loadFromFile("font/arial.ttf");
+
+    //creating label
+    sf::Text text;
+    text.setFont(font);
+    text.setColor(sf::Color::White);
+    text.setCharacterSize(20);
+    text.setPosition(w_width/5, 10);
+    switch(codigo){
+        case 0:
+            text.setString("nenhum homem livre");
+            break;
+        case 1:
+            text.setString("ouro insuficiente!!!");
+    }
+    sf::Text text2;
+    text2.setFont(font);
+    text2.setColor(sf::Color::White);
+    text2.setCharacterSize(20);
+    text2.setPosition(w_width/5, 35);
+    text2.setString("OPERACAO FALHOU");
+
+    while (alert.isOpen() && renderWindow.isOpen()){
+        //initializing event
+        sf::Event event;
+        // Check for all the events that occured since the last frame.
+        while (alert.pollEvent(event)){
+            //Handle events here
+            if (event.type == sf::Event::Closed){
+                alert.close();
+            }
+            sair.update(event);
+        }
+        alert.clear();
+        alert.draw(text);
+        alert.draw(text2);
+        alert.draw(sair);
+        alert.display();
+    }
 }
 void start_game(){
     game_window_open = true;
@@ -626,26 +822,24 @@ void initializing_player_infos(){
     infos.close();
     start_game();
 }
-void Setposicoes(){//setando as posiçoes
-    for(int i=0;i<8;i++){
-        for(int j=0;j<8;j++){
-            mapa[i][j].setPosicao(i,j);
-        }
-    }
-}
 int main(){
-
+    srand(time(nullptr));
     //logica dos territorios s
     //alocando a matriz mapa
     mapa=new Territorio*[8];
     for(int i=0;i<8;i++){
         mapa[i]=new Territorio[8];
     }
-    Setposicoes();
+    //gerando o ouro de cada terreno
+    for(int i=0;i<8;i++){
+        for(int j=0;j<8;j++){
+            mapa[i][j].SetQtdOuro(rand()%100);
+        }
+    }
     ///DEFINIÇOES DO PLAYER
     //definindo player como dono da posicao (0,7) obs player=1, cpu =2
     CivilPlayer.setId(1);
-    mapa[0][7].setDono(1);
+    mapa[0][0].setDono(1);
 
     menu();
     return 0;

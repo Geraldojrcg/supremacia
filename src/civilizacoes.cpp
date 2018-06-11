@@ -2,12 +2,12 @@
 
 
 Civilizacao::Civilizacao(){
-	ouro=100;
+	ouro=1000;
 	soldadosLivres=0;
 }
 Civilizacao::Civilizacao(std::string userName){
 	rei=userName;
-	ouro=100;
+	ouro=1000;
 	soldadosLivres=0;
 }
 void Civilizacao::setRei(std::string rei){

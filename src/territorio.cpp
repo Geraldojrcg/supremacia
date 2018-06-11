@@ -2,9 +2,23 @@
 
 
 #include<iostream>
-void  Territorio::setPosicao(int x,int y){
-	posicao[0]=x;
-	posicao[1]=y;
+void  Territorio::SetQtdOuro(int ouro){
+	qtd_de_ouro=ouro;
+}
+int Territorio::getQtdDeOuro(){
+	int ouro=qtd_de_ouro;
+	qtd_de_ouro=0;
+	return ouro;
+}
+void Territorio::changeOuro(){//funcao que diz que o terreno nao possue mais ouro
+	tem_ouro=false;
+}
+bool Territorio::HaveOuro(){
+	if(qtd_de_ouro>0){
+		return true;
+	}else{
+		return false;
+	}
 }
 void Territorio::setDono(int newDono){
 	dono=newDono;
