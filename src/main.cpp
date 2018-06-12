@@ -454,37 +454,32 @@ void deslocarExercito(int i,int j){
         if(lastReferencia->getForcaDoExercito()>mapa[i][j].endereco->getForcaDoExercito()){
             //calcula a media de poder
             int media;
-            int p=0;
             media=lastReferencia->getForcaDoExercito()/lastReferencia->qtdDeSoldados();
-            for(Soldado* aux : lastReferencia->soldados){
-                std::cout<<"media"<<media<<std::endl;
-                std::cout<<"forca do soldado"<<aux->getForca()<<std::endl;
-                if(aux->getForca()<media){//verifica quais os soldados inferiores a media de poder
-                    lastReferencia->soldados.erase(lastReferencia->soldados.begin()+p);//remove os soldados fracos
-                std::cout<<"3"<<std::endl;
+            for(int p=0;p<lastReferencia->qtdDeSoldados();p++){
+                Soldado* aux=lastReferencia->SoldDead(media);
+                if(lastReferencia->found){
+                    lastReferencia->removerSoldado(aux);
                 }
-                p++;
             }
-            std::cout<<"4"<<std::endl;
             delete mapa[i][j].endereco;//destroi o exercito da ia
-            std::cout<<"5"<<std::endl;
             mapa[i][j].colocarExercito(lastReferencia,1);//set o territorio com seu exercito
             terras[i][j].changeColor(sf::Color(0, 0, 255));//muda a cor do campo
             std::cout<<"player win"<<std::endl;
 
         }
-        //verificar se a ia é mais forte
         else if(lastReferencia->getForcaDoExercito()<mapa[i][j].endereco->getForcaDoExercito()){
             //calcula a media de poder
-            int media;
-            media=mapa[i][j].endereco->getForcaDoExercito()/mapa[i][j].endereco->qtdDeSoldados();
-            for(Soldado* aux : mapa[i][j].endereco->soldados){
-                if(aux->getForca()<media){//verifica quais os soldados inferiores a media de poder
+            int media2;
+            media2=mapa[i][j].endereco->getForcaDoExercito()/mapa[i][j].endereco->qtdDeSoldados();
+            for(int p=0;p<mapa[i][j].endereco->qtdDeSoldados();p++){
+                Soldado* aux=mapa[i][j].endereco->SoldDead(media2);
+                if(mapa[i][j].endereco->found){
                     mapa[i][j].endereco->removerSoldado(aux);
                 }
             }
-            delete lastReferencia;
-            std::cout<<"IA win"<<std::endl;
+            delete lastReferencia;//destroi o exercito do player
+            std::cout<<"ia win"<<std::endl;
+
         }
 
     }
@@ -918,6 +913,13 @@ int main(){
     CivilIa.setId(2);
     mapa[7][7].setDono(2);
     mapa[2][2].addExercito(&CivilIa);
+    Soldado *sol=new Soldado;
+    sol->forca=50;
+    mapa[2][2].endereco->adicionarSoldado(sol);
+    Soldado *sol2=new Soldado;
+    mapa[2][2].endereco->adicionarSoldado(sol2);
+    Soldado *sol3=new Soldado;
+    mapa[2][2].endereco->adicionarSoldado(sol3);
     menu();
     return 0;
 }

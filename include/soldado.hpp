@@ -8,5 +8,6 @@ public:
 	int preco;
 public:
 	Soldado()=default;
+	~Soldado()=default;
 	int getForca();
 };

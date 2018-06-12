@@ -11,6 +11,7 @@ private:
 	int posicao[2];
 public:
 	std::list<Soldado*> soldados;//deu ruim sendo public
+	bool found;
 public:
 	Exercito()=default;
 	Exercito(int x,int y);
@@ -18,7 +19,8 @@ public:
 	int qtdDeSoldados();
 	int getForcaDoExercito();
 	void adicionarSoldado(Soldado *newSoldado);
-	void removerSoldado(Soldado *soldado);
+	void removerSoldado(Soldado* soldado);
+	Soldado* SoldDead(int media);
 };
 
 #endif
