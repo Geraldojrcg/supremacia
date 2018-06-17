@@ -4,8 +4,8 @@
 Exercito::Exercito(int x,int y){
 	posicao[0]=x;
 	posicao[1]=y;
-	Soldado *s=new Soldado;
-	adicionarSoldado(s);
+	//Soldado *s=new Soldado;
+	//adicionarSoldado(s);
 }
 int Exercito::qtdDeSoldados(){
 	return soldados.size();

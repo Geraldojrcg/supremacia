@@ -11,6 +11,7 @@ private:
 	bool ocupado=false;
 public:
 	Exercito *endereco; 
+public:
 	Territorio()=default;
 	Exercito *getEndereco();
 	void SetQtdOuro(int ouro);
@@ -24,6 +25,7 @@ public:
 	bool Ocupado();
 	void colocarExercito(Exercito *exercito,int id);
 	void addExercito(Civilizacao *civil);
+	void addExercitoIa(Civilizacao *civil,int i,int j);
 	void destruirExercito();
 	~Territorio()=default;
 };

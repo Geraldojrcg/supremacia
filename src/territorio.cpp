@@ -46,6 +46,12 @@ void Territorio::addExercito(Civilizacao *civil){
 	this->ocupado=true;
 	this->dono=civil->getId();
 }
+void Territorio::addExercitoIa(Civilizacao *civil,int i,int j){
+	Exercito *newExercito =new Exercito(i,j);
+	this->endereco=newExercito;
+	this->ocupado=true;
+	this->dono=civil->getId();
+}
 void Territorio::destruirExercito(){
 	delete endereco;
 }

@@ -2,16 +2,18 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include "../include/button.hpp"
-#include "../include/menu.hpp"
 #include <random>
 #include <cmath>
 #include <string>
+#include <vector>
 #include <stdlib.h>
 #include <time.h>
+#include<unistd.h> 
+#include<stdio.h> 
 
 #include"civilizacoes.hpp"
 #include"global.hpp"
-
+///GLOBAL DEACLARATIONS  
 sf::RenderWindow renderWindow;
 sf::RenderWindow window_c_soldado;
 sf::RenderWindow window;
@@ -38,7 +40,16 @@ bool alertB=false;
 int mana;
     //load music theme menu
 sf::Music music;
-
+///iniciando itens referentes a IA
+int exercitosDaIa[64][2];//matriz onde fica as informaçoes de quantos exercitos a ia possui e sua localizaoes
+std::list<Exercito*> exercitosIa;
+//endereços dos exercitos da ia
+//1 
+Exercito *ia1;
+//2 
+Exercito *ia2;
+//3 
+Exercito *ia3;
 
 void start_game();
 void initializing_player_infos();
@@ -49,10 +60,15 @@ void exercito_options_quit();
 void terras_options_quit();
 void alert_window(int codigo);
 void alert_quit();
+void mover_ia(int i,int j);
+void decisoes_ia();
+void imprimir_matriz();
+void menu();
 
 void quit_game(){
     renderWindow.close();
     std::_Exit(EXIT_FAILURE);
+    
 }
 void continue_game(){
     
@@ -76,7 +92,11 @@ void exit_game(){
     int w_height = 200;
     sf::RenderWindow window_exit(sf::VideoMode(w_width, w_height), "Supremacia Demo", sf::Style::Titlebar + sf::Style::Close);
     Button sair("Sair", sf::Vector2f(w_height/2, w_height/2), 40, quit_game, sf::Color(200, 0, 0));
-
+    //load background
+    sf::Texture texture;
+    if (!texture.loadFromFile("sprites/loja.png")){
+    }
+    sf::Sprite background(texture);
     sf::Font font;
     font.loadFromFile("font/arial.ttf");
 
@@ -100,7 +120,7 @@ void exit_game(){
             sair.update(event);
         }
         window_exit.clear();
-        //window_exit.draw(rectangle);
+        window_exit.draw(background);
         window_exit.draw(text);
         window_exit.draw(sair);
         window_exit.display();
@@ -443,7 +463,7 @@ void terras_options(int i,int j){
 
     }
 }
-void deslocarExercito(int i,int j){
+void deslocarExercito(int i,int j){//battle 
     if(!mapa[i][j].Ocupado()){
        mapa[i][j].colocarExercito(lastReferencia,1);
        terras[i][j].changeColor(sf::Color(0, 0, 255));
@@ -461,10 +481,22 @@ void deslocarExercito(int i,int j){
                     lastReferencia->removerSoldado(aux);
                 }
             }
-            delete mapa[i][j].endereco;//destroi o exercito da ia
+            //exercitosIa.remove(mapa[i][j].endereco);
+            switch( mapa[i][j].endereco->iaExercito){
+                case 1:
+                    ia1=nullptr;
+                    break;
+                case 2:
+                    ia2=nullptr;
+                    break;
+                case 3:
+                    ia3=nullptr;
+                    break;
+            }
+            mapa[i][j].endereco=nullptr;
             mapa[i][j].colocarExercito(lastReferencia,1);//set o territorio com seu exercito
             terras[i][j].changeColor(sf::Color(0, 0, 255));//muda a cor do campo
-            std::cout<<"player win"<<std::endl;
+            alert_window(5);//5 avisa se o player ganhou ou nao a batalha.
 
         }
         else if(lastReferencia->getForcaDoExercito()<mapa[i][j].endereco->getForcaDoExercito()){
@@ -478,7 +510,7 @@ void deslocarExercito(int i,int j){
                 }
             }
             delete lastReferencia;//destroi o exercito do player
-            std::cout<<"ia win"<<std::endl;
+            alert_window(6);//6 avisa se a ia ganhou ou nao a batalha.
 
         }
 
@@ -572,7 +604,16 @@ void alert_window(int codigo){
     2 =  para falar que nao pode desistir de um movimento
     3 = informar que nao possui mais ouro ali
     4 = avisa que um inimigo esta ali
+    5 = avisa se o player ganhou ou nao a batalha.
+    6 = avisa a ia ganhou ou nao a batalha.
+    7 = cercou seu castelo e venceu
+    8 = inicio turno da ia
+    9 = fim turno da ia
+    10 = player win por supremacia
+    11 = ia win por supremacia
+    12 = player cercou ia
     */
+    int falha=0;//variavel que diz se a mensagem de falha na operação vai ou nao aparecer
     int w_width = 300;
     int w_height = 200;
     alert.create(sf::VideoMode(w_width, w_height), "ALERT", sf::Style::Titlebar + sf::Style::Close);
@@ -593,20 +634,60 @@ void alert_window(int codigo){
             break;
         case 1:
             text.setString("ouro insuficiente!!!");
+            break;
         case 2:
             text.setString("Nao pode cancelar movimento");
+            break;
         case 3:
             text.setString("Nao possui ouro nesse terreno");
+            break;
         case 4:
             text.setString("terreno dominado por inimigo");
+            falha=1;
+            break;
+        case 5:
+            text.setString("Voce venceu a batalha");
+            falha=1;
+            break;
+        case 6:
+            text.setString("Voce perdeu a batalha");
+            falha=1;
+            break;
+        case 7:
+            text.setString("Voce foi cercado! GAME OVER!!!");
+            falha=1;
+            break;
+        case 8:
+            text.setString("Turno da IA");
+            falha=1;
+            break;
+        case 9:
+            text.setString("Seu Turno");
+            falha=1;
+            break;
+        case 10:
+            text.setString("!!! YOU WIN !!!\n conquistou mais de 50% \n do territorio");
+            falha=1;
+            break;
+        case 11:
+            text.setString("!!! GAME OVER !!!\n inimigo conquistou mais \nde 50% do territorio");
+            falha=1;
+            break;
+        case 12:
+            text.setString("!!! YOU WIN !!!\n     voce cercou o     \n      inimigo     ");
+            falha=1;
+            break;
     }
     sf::Text text2;
     text2.setFont(font);
     text2.setColor(sf::Color::White);
     text2.setCharacterSize(20);
     text2.setPosition(w_width/5, 35);
-    text2.setString("OPERACAO FALHOU");
-
+    if(falha==0){
+        text2.setString("OPERACAO FALHOU");
+    }else{
+        text2.setString(" ");
+    }
     while (alert.isOpen() && renderWindow.isOpen()){
         //initializing event
         sf::Event event;
@@ -625,10 +706,34 @@ void alert_window(int codigo){
         alert.display();
     }
 }
+void verificar_porcetagem_de_conquista(){
+    int player=0,ia=0;
+    for(int i=0;i<8;i++){
+        for(int j=0;j<8;j++){
+            if(mapa[i][j].getDono()==1){
+                player++;
+            }else if(mapa[i][j].getDono()==2){
+                ia++;
+            }
+        }
+    }
+    if(player>24){
+        alert_window(10);//player win
+        music.stop();
+        renderWindow.close();
+        menu();
+    }else if(ia>24){
+        alert_window(11);//player ia
+        music.stop();
+        renderWindow.close();
+        menu();
+    }
+}
 void start_game(){
     game_window_open = true;
     int w_width = 800;
     int w_height = 620;
+    int cout=0,msn=0;
     //creating window
     renderWindow.create(sf::VideoMode(w_width, w_height), "Supremacia Demo", sf::Style::Titlebar + sf::Style::Close);
 
@@ -736,6 +841,7 @@ void start_game(){
             if (event.type == sf::Event::Closed){
                 music.stop();
                 renderWindow.close();
+                menu();
             }
             c_soldado.update(event);
             sair.update(event);
@@ -772,22 +878,64 @@ void start_game(){
         text_sol_livre.setString("Soldados fora de combate  : "+sol);
         renderWindow.display();
         move=std::to_string(mana);
-        text_move.setString("Soldados fora de combate  : "+move);
+        text_move.setString("movimentos restantes : "+move);
 
+        //verificar turno
+        if(mana<=0){
+            if(msn==0){
+                alert_window(8);//8 avisar turno da IA
+                msn=1;
+            }
+            sleep(1);
+            decisoes_ia();
+            cout++;
+            if(cout==5){
+                mana=3;
+                cout=0;
+                msn=0;
+                alert_window(9);//9 avisar turno da acabou
+            } 
+        }
+        if(mapa[1][0].Ocupado()&&mapa[1][1].Ocupado()&&mapa[0][1].Ocupado()){
+            if((mapa[1][0].getDono()==mapa[1][1].getDono())&&(mapa[0][1].getDono()==2)){
+                alert_window(7);//7 cercou seu castelo e venceu
+                music.stop();
+                renderWindow.close();
+                menu();
+            }
+        }
+        if(mapa[6][6].Ocupado()&&mapa[6][7].Ocupado()&&mapa[7][6].Ocupado()){
+            if((mapa[6][6].getDono()==mapa[6][7].getDono())&&(mapa[7][6].getDono()==1)){
+                alert_window(12);//7 cercou seu castelo e venceu
+                music.stop();
+                renderWindow.close();
+                menu();
+            }
+        }
+        verificar_porcetagem_de_conquista();
     }
 
 
 }
 void menu(){
     window.create(sf::VideoMode(800, 600), "joguinho!");
-    Menu menu(window.getSize().x,window.getSize().y);
     //load background
     sf::Texture texture;
     if (!texture.loadFromFile("sprites/bg.png")){
     }
     sf::Sprite background(texture);
+    //loading fonts
+    sf::Font font;
+    font.loadFromFile("font/arial.ttf");
     //music
     music.openFromFile("sound/sound.ogg");
+    //credits music
+    sf::Text text;
+    text.setFont(font);
+    text.setColor(sf::Color::White);
+    text.setCharacterSize(18);
+    text.setPosition(20, 580);
+    text.setString("Music by Eric Matyas\nwww.soundimage.org");
 
     //botoes
     Button iniciar(" INICIAR ", sf::Vector2f(50, 400), 50, initiaze_game, sf::Color(200, 0, 0));
@@ -808,6 +956,7 @@ void menu(){
         }
         window.clear();
         window.draw(background);
+        window.draw(text);
         window.draw(iniciar);
         window.draw(sair);
         window.draw(continuar);
@@ -889,6 +1038,270 @@ void initializing_player_infos(){
     infos.close();
     start_game();
 }
+
+///FUNCTIONS OF I.A
+
+void imprimir_matriz(){//imprimindo a matriz
+    for(int i=-1;i<=8;i++){
+        for(int j=-1;j<=8;j++){
+            if(i>=0&&j>=0&&i<8&&j<8){
+                if(mapa[i][j].getDono()==1){
+                    std::cout<<"# ";
+                }
+                else if(mapa[i][j].getDono()==0){
+                    std::cout<<"  ";
+                }else{
+                    std::cout<<"* ";
+                }
+            }else{
+                std::cout<<"@ ";
+            }
+        }
+        std::cout<<std::endl;
+    }
+    std::cout<<std::endl;
+}
+void localizar_inimigos(){
+    for(int i=0;i<8;i++){//zera a matriz
+        for(int j=0;j<8;j++){
+            warnning[i][j]=0;
+        }
+    }
+    for(int i=0;i<8;i++){//define as posiçoes que possuem inimigos
+        for(int j=0;j<8;j++){
+            if(mapa[i][j].getDono() == 1 && mapa[i][j].getDono()==1){
+                warnning[i][j]=1;
+            }
+        }
+    }
+}
+void verificar_vizinhos(int i,int j){//verifica se as posicoes vizinhas daquele territorio esta vazia ou ocupada
+    //verificar qual a direção mais propriça;
+    int x=i;
+    int y=j;
+    
+    //verifcar se vizinhos estao livres, se livre 0, se ocupado 1;s
+    //esquerda
+    if(warnning[x][y-1]==1){
+        direcao[0]=1;
+    }
+    //direita
+    if(warnning[x][y+1]==1){
+        direcao[1]=1;
+    }
+    //cima
+    if(warnning[x-1][y]==1){
+        direcao[2]=1;
+    }
+    //baixo
+    if(warnning[x+1][y]==1){
+        direcao[3]=1;
+    }
+}
+void numero_de_inimigos_direcao(int i,int j){
+    //numeros de inimigos em direção cada direção livre
+    for(int a=0;a<4;a++){
+        switch(a){
+            case 0:
+                //esquerda
+                for(int x=i-1;x<=i+1;x++){
+                    for(int y=j-3;y<=j-1;y++){
+                        if(x>-1 && x<8 && y>-1 && y<8 && warnning[x][y]==1){
+                            numeroDeInimigos[a]++;
+                        }
+                    }
+                }
+                break;
+            case 1:
+                //direita
+                for(int x=i-1;x<=i+1;x++){
+                    for(int y=j+1;y<=i+3;y++){
+                        if(x>-1 && x<8 && y>-1 && y<8 && warnning[x][y]==1){
+                            numeroDeInimigos[a]++;
+                        }
+                    }
+                }
+                break;
+            case 2:
+                //cima
+                for(int x=i-3;x<=i-1;x++){
+                    for(int y=j-1;y<=j+1;y++){
+                        if(x>-1 && x<8 && y>-1 && y<8 && warnning[x][y]==1){
+                            numeroDeInimigos[a]++;
+                        }
+                    }
+                }
+                break;
+            case 3:
+                //baixo
+                for(int x=i+1;x<=i+3;x++){
+                    for(int y=j-1;y<=j+1;y++){
+                        if(x>-1 && x<8 && y>-1 && y<8 && warnning[x][y]==1){
+                            numeroDeInimigos[a]++;
+                        }
+                    }
+                }
+                break;
+        }
+        
+    }
+}
+void mover_ia(int i,int j){//funcao de IA
+    if((i==0&&j==1)||(i==1&&j==0)||(i==1&&j==1)){
+        return;
+    }
+    //desoculpar terro antigo
+    lastReferencia=mapa[i][j].getEndereco();
+    terras[i][j].changeColor(sf::Color(128, 70, 0));
+    mapa[i][j].desocupar();
+
+    int x1,y1;
+    int x=i;
+    int y=j;   
+    //decidir para onde se mover
+    int melhorDirecao=4;
+    for(int i=0;i<4;i++){//zera o numero de inimigos da posiçao antiga
+        numeroDeInimigos[i]=0;
+    }
+    //random para movimentar(FIXME:deve ser feito algo para nao ser randomico)
+    srand((unsigned)time(0));
+
+    //priorizando esquerda e cima pois é onde o jogador inicia
+    //movimento diagonal
+    int teste=0;
+    if(((x-1)>-1 && (x-1)<8 && (y-1)>-1 && (y-1)<8) && !mapa[x-1][y-1].Ocupado()){
+        x1=x-1;
+        y1=y-1;
+        teste=1;
+    }//movimento esquerda
+    if((x)>-1 && (x)<8 && (y-1)>-1 && (y-1)<8 ){
+        if(teste==0){
+            if(!mapa[x][y-1].Ocupado()){
+                x1=x;
+                y1=y-1;
+                teste=1;
+            }
+        }
+    }//movimento cima
+    if( (x-1)>-1 && (x-1)<8 && (y)>-1 && (y)<8 ){
+        if(teste==0){
+            if(!mapa[x-1][y].Ocupado()){
+                x1=x-1;
+                y1=y;
+                teste=1;
+            }
+        }
+    }
+    if(teste==0){
+        //movimentar
+        melhorDirecao=rand()%2;
+        if(melhorDirecao==0){
+            if((x>-1 && x<8 && (y+1)>-1 && (y+1)<8) && direcao[1]==0 && !mapa[x][y+1].Ocupado()){
+                x1=x;
+                y1=y+1;
+            }
+            else{
+                x1=x;
+                y1=y;
+            }
+        }
+        else if(melhorDirecao==1){
+            if(((x+1)>-1 && (x+1)<8 && (y)>-1 && (y)<8 )&& direcao[3]==0 && !mapa[x+1][y].Ocupado()){
+                x1=x+1;
+                y1=y;
+            }
+            else{
+                x1=x;
+                y1=y;
+            }
+        }
+        else{
+            x1=x;
+            y1=y;
+        }       
+    }
+    mapa[x1][y1].colocarExercito(lastReferencia,2);
+    mapa[x1][y1].endereco->posicao[0]=x1;
+    mapa[x1][y1].endereco->posicao[1]=y1;
+    terras[x1][y1].changeColor(sf::Color(255, 0, 0));
+    //mapa[x1][y1].setDono(civ[0]);
+}
+void novo_exercito(){
+    if(!ia1){
+        mapa[6][7].addExercitoIa(&CivilIa,6,7);
+        ia1=mapa[6][7].getEndereco();
+        ia1->iaExercito=1;    
+    }
+    if(!ia2){
+        mapa[6][6].addExercitoIa(&CivilIa,6,6);
+        ia2=mapa[6][6].getEndereco();
+        ia2->iaExercito=2;
+    }
+    if(!ia3){
+        mapa[7][6].addExercitoIa(&CivilIa,7,6);
+        ia3=mapa[7][6].getEndereco();
+        ia3->iaExercito=3;
+    }
+}
+void add_soldado_ia(){
+    srand(time(nullptr));
+    int decisao=rand()%3;
+    Soldado *s =new Soldado();
+    s->forca=5+(rand()%10);
+    switch(decisao){
+        case 0:
+            ia1->adicionarSoldado(s);
+            break;
+        case 1:
+            ia2->adicionarSoldado(s);
+            break;
+        case 2:
+            ia3->adicionarSoldado(s);
+            break;
+    }
+}
+void decisoes_ia(){
+    srand(time(nullptr));
+    int decisao=rand()%2;
+    switch(decisao){
+        //mover
+        case 0:
+            novo_exercito();
+            decisao=rand()%3;
+            switch(decisao){
+                case 0:
+                    mover_ia(ia1->posicao[0],ia1->posicao[1]);
+                    break;
+                case 1:
+                    mover_ia(ia2->posicao[0],ia2->posicao[1]);
+                    break;
+                case 2:
+                    mover_ia(ia3->posicao[0],ia3->posicao[1]);
+                    break;
+            }
+            break;
+        case 1:
+            //pegar ouro
+            decisao=rand()%3;
+            switch(decisao){
+                case 0:
+                    mapa[ia1->posicao[0]][ia1->posicao[1]].getQtdDeOuro();
+                    break;
+                case 1:
+                    mapa[ia2->posicao[0]][ia2->posicao[1]].getQtdDeOuro();
+                    break;
+                case 2:
+                    mapa[ia3->posicao[0]][ia3->posicao[1]].getQtdDeOuro();
+                    break;
+            }
+            break;
+    }
+    //adicionar soldado
+    add_soldado_ia();
+    
+    //comprar soldado
+    //atacar
+}
 int main(){
     srand(time(nullptr));
     //logica dos territorios s
@@ -903,23 +1316,31 @@ int main(){
             mapa[i][j].SetQtdOuro(rand()%100);
         }
     }
+    //deixando todos os terrenos sem dono
+    for(int i=0;i<8;i++){
+        for(int j=0;j<8;j++){
+            mapa[i][j].setDono(0);
+        }
+    }
     ///DEFINIÇOES DO PLAYER
     //mana inicial 
-    mana=5;
-    //definindo player como dono da posicao (0,7) obs player=1, cpu =2
+    mana=3;
+    //definindo player como dono da posicao (0,0) obs: playerID=1, iaID =2
     CivilPlayer.setId(1);
     mapa[0][0].setDono(1);
-
+    ///DEFINICOES DA IA
     CivilIa.setId(2);
     mapa[7][7].setDono(2);
-    mapa[2][2].addExercito(&CivilIa);
-    Soldado *sol=new Soldado;
-    sol->forca=50;
-    mapa[2][2].endereco->adicionarSoldado(sol);
-    Soldado *sol2=new Soldado;
-    mapa[2][2].endereco->adicionarSoldado(sol2);
-    Soldado *sol3=new Soldado;
-    mapa[2][2].endereco->adicionarSoldado(sol3);
+    for(int i=0;i<64;i++){//zerando matriz exercitosDaIa
+        for(int j=0;j<3;j++){
+            exercitosDaIa[i][j]=0;
+        }
+    }
+    ia1=nullptr;
+    ia2=nullptr;
+    ia3=nullptr;
+    novo_exercito();
+    ///iniciando o jogo
     menu();
     return 0;
 }

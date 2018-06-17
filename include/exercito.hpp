@@ -6,12 +6,11 @@
 #include <list>
 
 class Exercito{
-private:
-	
-	int posicao[2];
 public:
+	int posicao[2];
 	std::list<Soldado*> soldados;//deu ruim sendo public
 	bool found;
+	int iaExercito=0;
 public:
 	Exercito()=default;
 	Exercito(int x,int y);
