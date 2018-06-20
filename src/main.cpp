@@ -52,6 +52,8 @@ Exercito *ia1;
 Exercito *ia2;
 //3 
 Exercito *ia3;
+//3 
+Exercito *ia4;
 
 void start_game();
 void initializing_player_infos();
@@ -723,7 +725,7 @@ void alert_window(int codigo){
         alert.display();
     }
 }
-void verificar_porcetagem_de_conquista(){
+bool verificar_porcetagem_de_conquista(){
     int player=0,ia=0;
     for(int i=0;i<8;i++){
         for(int j=0;j<8;j++){
@@ -736,14 +738,12 @@ void verificar_porcetagem_de_conquista(){
     }
     if(player>24){
         alert_window(10);//player win
-        music.stop();
-        renderWindow.close();
-        menu();
+        return true;
     }else if(ia>24){
         alert_window(11);//player ia
-        music.stop();
-        renderWindow.close();
-        menu();
+        return true;
+    }else{
+        return false;
     }
 }
 void start_game(){
@@ -851,6 +851,8 @@ void start_game(){
             }
         }
     }
+    //verificador de cerco
+    bool cerco=false;
     //game window music music
     sf::Music music;
     music.setLoop(true);
@@ -865,8 +867,7 @@ void start_game(){
             //Handle events here
             if (event.type == sf::Event::Closed){
                 music.stop();
-                renderWindow.close();
-                menu();
+                quit_game();
             }
             c_soldado.update(event);
             salvar.update(event);
@@ -880,6 +881,10 @@ void start_game(){
         //verificação da mana do jogador para entrar no turno da ia
         if(mana==0){
             //entra no turno da ia
+        }
+        if(cerco){
+            music.stop();
+            renderWindow.close();
         }
         renderWindow.clear(color);
         renderWindow.draw(territorio);
@@ -925,20 +930,19 @@ void start_game(){
         if(mapa[1][0].Ocupado()&&mapa[1][1].Ocupado()&&mapa[0][1].Ocupado()){
             if((mapa[1][0].getDono()==mapa[1][1].getDono())&&(mapa[0][1].getDono()==2)){
                 alert_window(7);//7 cercou seu castelo e venceu
-                music.stop();
-                renderWindow.close();
-                menu();
+                cerco=true;
             }
         }
         if(mapa[6][6].Ocupado()&&mapa[6][7].Ocupado()&&mapa[7][6].Ocupado()){
             if((mapa[6][6].getDono()==mapa[6][7].getDono())&&(mapa[7][6].getDono()==1)){
                 alert_window(12);//7 cercou seu castelo e venceu
-                music.stop();
-                renderWindow.close();
-                menu();
+                cerco=true;
             }
         }
-        verificar_porcetagem_de_conquista();
+        if(verificar_porcetagem_de_conquista()){
+            music.stop();
+            quit_game();
+        }
     }
 }
 void menu(){
@@ -1236,7 +1240,7 @@ void mover_ia(int i,int j){//funcao de IA
         //movimentar
         melhorDirecao=rand()%2;
         if(melhorDirecao==0){
-            if((x>-1 && x<8 && (y+1)>-1 && (y+1)<8) && direcao[1]==0 && !mapa[x][y+1].Ocupado()){
+            if((x>-1 && x<8 && (y+1)>-1 && (y+1)<8)  && !mapa[x][y+1].Ocupado()){
                 x1=x;
                 y1=y+1;
             }
@@ -1246,7 +1250,7 @@ void mover_ia(int i,int j){//funcao de IA
             }
         }
         else if(melhorDirecao==1){
-            if(((x+1)>-1 && (x+1)<8 && (y)>-1 && (y)<8 )&& direcao[3]==0 && !mapa[x+1][y].Ocupado()){
+            if(((x+1)>-1 && (x+1)<8 && (y)>-1 && (y)<8 ) && !mapa[x+1][y].Ocupado()){
                 x1=x+1;
                 y1=y;
             }
@@ -1266,6 +1270,74 @@ void mover_ia(int i,int j){//funcao de IA
     terras[x1][y1].changeColor(sf::Color(255, 0, 0));
     //mapa[x1][y1].setDono(civ[0]);
 }
+void mover_ia2(int i,int j){//funcao de IA
+    if((i==0&&j==1)||(i==1&&j==0)||(i==1&&j==1)){
+        return;
+    }
+    //desoculpar terro antigo
+    lastReferencia=mapa[i][j].getEndereco();
+    terras[i][j].changeColor(sf::Color(128, 70, 0));
+    mapa[i][j].desocupar();
+
+    int x1,y1;
+    int x=i;
+    int y=j;   
+    //decidir para onde se mover
+    int melhorDirecao=4;
+    for(int i=0;i<4;i++){//zera o numero de inimigos da posiçao antiga
+        numeroDeInimigos[i]=0;
+    }
+    //random para movimentar(FIXME:deve ser feito algo para nao ser randomico)
+    srand((unsigned)time(0));
+    melhorDirecao=rand()%4;
+    if(melhorDirecao==0){
+        if((x>-1 && x<8 && (y+1)>-1 && (y+1)<8)  && !mapa[x][y+1].Ocupado()){
+            x1=x;
+            y1=y+1;
+        }
+        else{
+            x1=x;
+            y1=y;
+        }
+    }
+    else if(melhorDirecao==1){
+        if(((x+1)>-1 && (x+1)<8 && (y)>-1 && (y)<8 ) && !mapa[x+1][y].Ocupado()){
+            x1=x+1;
+            y1=y;
+        }
+        else{
+            x1=x;
+            y1=y;
+        }
+    }
+    else if(melhorDirecao==2){
+        if(((x-1)>-1 && (x-1)<8 && (y)>-1 && (y)<8 ) && !mapa[x-1][y].Ocupado()){
+            x1=x-1;
+            y1=y;
+        }
+        else{
+            x1=x;
+            y1=y;
+        }
+    }else if(melhorDirecao==3){
+        if(((x)>-1 && (x)<8 && (y-1)>-1 && (y-1)<8 ) && !mapa[x][y-1].Ocupado()){
+            x1=x;
+            y1=y-1;
+        }
+        else{
+            x1=x;
+            y1=y;
+        }
+    }
+    else{
+        x1=x;
+        y1=y;
+    }       
+    mapa[x1][y1].colocarExercito(lastReferencia,2);
+    mapa[x1][y1].endereco->posicao[0]=x1;
+    mapa[x1][y1].endereco->posicao[1]=y1;
+    terras[x1][y1].changeColor(sf::Color(255, 0, 0));
+}
 void novo_exercito(){
     if(!ia1){
         mapa[6][7].addExercitoIa(&CivilIa,6,7);
@@ -1281,6 +1353,11 @@ void novo_exercito(){
         mapa[7][6].addExercitoIa(&CivilIa,7,6);
         ia3=mapa[7][6].getEndereco();
         ia3->iaExercito=3;
+    }
+    if(!ia4){
+        mapa[5][7].addExercitoIa(&CivilIa,5,7);
+        ia4=mapa[5][7].getEndereco();
+        ia4->iaExercito=4;
     }
 }
 void add_soldado_ia(){
@@ -1338,7 +1415,8 @@ void decisoes_ia(){
     }
     //adicionar soldado
     add_soldado_ia();
-    
+    novo_exercito();
+    mover_ia2(ia4->posicao[0],ia4->posicao[1]);
     //comprar soldado
     //atacar
 }
@@ -1359,8 +1437,6 @@ void save_game(){
         std::cerr <<"arquivo nao aberto"<<std::endl;
     }
     /*arquivo dados dos exercitos
-    1=numero de exercito
-    2 em diante contem o numero de soldados de cada exercito, cada linha referente a um exercito
     */
     //exercitos
     std::ofstream save1 ("save/saveData1.txt");
@@ -1412,6 +1488,28 @@ void save_game(){
             }
         }
         save3.close();
+    }else{
+        std::cerr <<"arquivo nao aberto"<<std::endl;
+    }
+    /*arquivo dados dos exercitos da ia
+    */
+    //exercitos
+    std::ofstream save4 ("save/saveData4.txt");
+    if(save4.is_open()){
+        //infos dos exercitos
+        for(int i=0;i<8;i++){
+            for(int j=0;j<8;j++){
+                if(mapa[i][j].Ocupado()&&mapa[i][j].getDono()==2){
+                    aux=std::to_string(mapa[i][j].endereco->qtdDeSoldados());
+                    I=std::to_string(i);
+                    J=std::to_string(j);
+                    save4<<I+"\n";
+                    save4<<J+"\n";
+                    save4<<aux+"\n";
+                }
+            }
+        }
+        save4.close();
     }else{
         std::cerr <<"arquivo nao aberto"<<std::endl;
     }
@@ -1528,6 +1626,39 @@ void load_game(){
         //TODO::JANELA DE LOAD FALHO
     }
 
+    //INFOS DOS EXERCITOS DA IA
+    std::ifstream data4;
+    linha=0;
+    k=0;//numero que começa o exercito e i,j do exercito
+    countAux=1;
+    data4.open("save/saveData4.txt");
+    if(data4.is_open()){
+        while(data4>>line){
+            if(countAux%3==0){
+                std::istringstream iss1(line);
+                iss1 >> aux;
+                k=aux;
+                mapa[i][j].addExercito(&CivilIa);
+                terras[i][j].changeColor(sf::Color(255, 0, 0));
+                for(int p=0;p<k;p++){
+                    add_soldado1(i,j);
+                }
+            }else if(countAux%2==0){
+                std::istringstream iss1(line);
+                iss1 >> aux;
+                j=aux;
+            }else{
+                std::istringstream iss1(line);
+                iss1 >> aux;
+                i=aux;
+            }
+            countAux++;
+        }
+        data4.close();
+    }else{
+        //TODO::JANELA DE LOAD FALHO
+    }
+
 }
 int main(){
     
@@ -1555,6 +1686,7 @@ int main(){
     ia1=nullptr;
     ia2=nullptr;
     ia3=nullptr;
+    ia4=nullptr;
     novo_exercito();
     //save_game();
     ///iniciando o jogo
