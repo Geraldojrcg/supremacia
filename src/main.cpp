@@ -506,6 +506,9 @@ void deslocarExercito(int i,int j){//battle
                 case 3:
                     ia3=nullptr;
                     break;
+                case 4:
+                    ia4=nullptr;
+                    break;
             }
             mapa[i][j].endereco=nullptr;
             mapa[i][j].colocarExercito(lastReferencia,1);//set o territorio com seu exercito
@@ -627,6 +630,7 @@ void alert_window(int codigo){
     11 = ia win por supremacia
     12 = player cercou ia
     13 = save game
+    14 = player nao possui exec nem ouro
     */
     int falha=0;//variavel que diz se a mensagem de falha na operação vai ou nao aparecer
     int w_width = 300;
@@ -696,6 +700,10 @@ void alert_window(int codigo){
             text.setString("   jogo salvo  ");
             falha=1;
             break;
+        case 14:
+            text.setString("!!! GAME OVER !!!\n Voce NAO possui  \nrecursos para lutar");
+            falha=1;
+            break;
     }
     sf::Text text2;
     text2.setFont(font);
@@ -727,8 +735,12 @@ void alert_window(int codigo){
 }
 bool verificar_porcetagem_de_conquista(){
     int player=0,ia=0;
+    int playerExe=0;
     for(int i=0;i<8;i++){
         for(int j=0;j<8;j++){
+            if(mapa[i][j].Ocupado() && mapa[i][j].getDono()==1){
+                playerExe++;
+            }
             if(mapa[i][j].getDono()==1){
                 player++;
             }else if(mapa[i][j].getDono()==2){
@@ -741,6 +753,9 @@ bool verificar_porcetagem_de_conquista(){
         return true;
     }else if(ia>24){
         alert_window(11);//player ia
+        return true;
+    }else if(playerExe<1 && CivilPlayer.getOuro()<100){
+        alert_window(14);//player nao possui exec nem ouro
         return true;
     }else{
         return false;
