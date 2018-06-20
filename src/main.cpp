@@ -6,6 +6,8 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>
 #include <stdlib.h>
 #include <time.h>
 #include<unistd.h> 
@@ -64,6 +66,8 @@ void mover_ia(int i,int j);
 void decisoes_ia();
 void imprimir_matriz();
 void menu();
+void load_game();
+void save_game();
 
 void quit_game(){
     renderWindow.close();
@@ -71,6 +75,12 @@ void quit_game(){
     
 }
 void continue_game(){
+    load_game();
+    window.close();
+    music.stop();
+    mapa[7][7].setDono(2);
+    mapa[0][0].setDono(1);
+    start_game();
     
 }
 void initiaze_game(){
@@ -340,6 +350,8 @@ void exercito_options(int i,int j){
         ouro="SIM";
     }
     text2.setString("Ouro coletado : "+ouro);
+
+    
     
 
     while (Exercito_options.isOpen() && renderWindow.isOpen()){
@@ -612,6 +624,7 @@ void alert_window(int codigo){
     10 = player win por supremacia
     11 = ia win por supremacia
     12 = player cercou ia
+    13 = save game
     */
     int falha=0;//variavel que diz se a mensagem de falha na operação vai ou nao aparecer
     int w_width = 300;
@@ -677,6 +690,10 @@ void alert_window(int codigo){
             text.setString("!!! YOU WIN !!!\n     voce cercou o     \n      inimigo     ");
             falha=1;
             break;
+        case 13:
+            text.setString("   jogo salvo  ");
+            falha=1;
+            break;
     }
     sf::Text text2;
     text2.setFont(font);
@@ -737,6 +754,7 @@ void start_game(){
     //creating window
     renderWindow.create(sf::VideoMode(w_width, w_height), "Supremacia Demo", sf::Style::Titlebar + sf::Style::Close);
 
+
     //loading fonts
     sf::Font font;
     font.loadFromFile("font/arial.ttf");
@@ -760,6 +778,7 @@ void start_game(){
     //botoes
     //mover.move(20, 430);
     Button c_soldado("Comprar Soldados", sf::Vector2f(20, 490), 35, comprar_soldado_window, sf::Color(10, 0, 0));
+    Button salvar("Salvar", sf::Vector2f(20, 550), 35, save_game, sf::Color(10, 0, 0));
     //c_soldado.move(20, 460);
 
     //painel de informações
@@ -816,11 +835,17 @@ void start_game(){
     //teste de tamanho de botao
     for(int i=0;i<8;i++){
         for(int j=0;j<8;j++){
-            if(mapa[i][j].getDono()==1){
+            if(mapa[i][j].getDono()==1 && mapa[i][j].Ocupado()){
                 terras[i][j].startTerrasBotton(sf::Vector2f(6+j*50, 11+i*50), 47, terras_options,i,j, sf::Color(0, 0, 255));
             }
-            else if(mapa[i][j].getDono()==2){
+            else if(mapa[i][j].getDono()==2 && mapa[i][j].Ocupado()){
                 terras[i][j].startTerrasBotton(sf::Vector2f(6+j*50, 11+i*50), 47, terras_options,i,j, sf::Color(255, 0, 0));
+            }
+            else if(mapa[i][j].getDono()==1){
+                terras[i][j].startTerrasBotton(sf::Vector2f(6+j*50, 11+i*50), 47, terras_options,i,j, sf::Color(0, 128, 128));
+            }
+            else if(mapa[i][j].getDono()==2){
+                terras[i][j].startTerrasBotton(sf::Vector2f(6+j*50, 11+i*50), 47, terras_options,i,j, sf::Color(128, 70, 0));
             }else{
                 terras[i][j].startTerrasBotton(sf::Vector2f(6+j*50, 11+i*50), 47, terras_options,i,j, sf::Color(107, 142, 35));
             }
@@ -844,6 +869,7 @@ void start_game(){
                 menu();
             }
             c_soldado.update(event);
+            salvar.update(event);
             sair.update(event);
             for(int i=0;i<8;i++){
                 for(int j=0;j<8;j++){
@@ -866,6 +892,7 @@ void start_game(){
         renderWindow.draw(text_sol_livre);
         renderWindow.draw(text_move);
         renderWindow.draw(sair);
+        renderWindow.draw(salvar);
         for(int i=0;i<8;i++){
             for(int j=0;j<8;j++){
                 renderWindow.draw(terras[i][j]);
@@ -879,7 +906,6 @@ void start_game(){
         renderWindow.display();
         move=std::to_string(mana);
         text_move.setString("movimentos restantes : "+move);
-
         //verificar turno
         if(mana<=0){
             if(msn==0){
@@ -914,8 +940,6 @@ void start_game(){
         }
         verificar_porcetagem_de_conquista();
     }
-
-
 }
 void menu(){
     window.create(sf::VideoMode(800, 600), "joguinho!");
@@ -967,7 +991,23 @@ void menu(){
 void initializing_player_infos_exit(){
     infos.close();
 }
+
 void initializing_player_infos(){
+    //gerando o ouro de cada terreno
+    for(int i=0;i<8;i++){
+        for(int j=0;j<8;j++){
+            mapa[i][j].SetQtdOuro(1+(rand()%100));
+        }
+    }
+    
+    //deixando todos os terrenos sem dono
+    for(int i=0;i<8;i++){
+        for(int j=0;j<8;j++){
+            mapa[i][j].setDono(0);
+        }
+    }
+    mapa[7][7].setDono(2);
+    mapa[0][0].setDono(1);
     int w_width = 350;
     int w_height = 200;
 
@@ -1032,9 +1072,9 @@ void initializing_player_infos(){
         infos.display();
 
     }
-
     std::string s = qtd_soldado.getString();
     CivilPlayer.setRei(s);
+    //load_game();
     infos.close();
     start_game();
 }
@@ -1302,7 +1342,195 @@ void decisoes_ia(){
     //comprar soldado
     //atacar
 }
+void save_game(){
+    /*arquivo dados do player
+    1=NOME DO REI
+    2=OURO
+    */
+    std::string aux;
+    std::ofstream save0 ("save/saveData0.txt");
+    if(save0.is_open()){
+        //infos do player
+        save0 <<CivilPlayer.getRei()+ "\n";
+        aux=std::to_string(CivilPlayer.getOuro());
+        save0 <<aux+ "\n";
+        save0.close();
+    }else{
+        std::cerr <<"arquivo nao aberto"<<std::endl;
+    }
+    /*arquivo dados dos exercitos
+    1=numero de exercito
+    2 em diante contem o numero de soldados de cada exercito, cada linha referente a um exercito
+    */
+    //exercitos
+    std::ofstream save1 ("save/saveData1.txt");
+    std::string I,J;
+    if(save1.is_open()){
+        //infos dos exercitos
+        for(int i=0;i<8;i++){
+            for(int j=0;j<8;j++){
+                if(mapa[i][j].Ocupado()&&mapa[i][j].getDono()==1){
+                    aux=std::to_string(mapa[i][j].endereco->qtdDeSoldados());
+                    I=std::to_string(i);
+                    J=std::to_string(j);
+                    save1<<I+"\n";
+                    save1<<J+"\n";
+                    save1<<aux+"\n";
+                }
+            }
+        }
+        save1.close();
+    }else{
+        std::cerr <<"arquivo nao aberto"<<std::endl;
+    }
+    /*arquivo dados dos terrenos
+    1-64 cada linha referente a um terreno, contem o outro 
+    */
+    std::ofstream save2 ("save/saveData2.txt");
+    if(save2.is_open()){
+        //infos dos exercitos
+        for(int i=0;i<8;i++){
+            for(int j=0;j<8;j++){
+                aux=std::to_string(mapa[i][j].getOuro());
+                save2<<aux+"\n";
+            }
+        }
+        save2.close();
+    }else{
+        std::cerr <<"arquivo nao aberto"<<std::endl;
+    }
+    /*DONOS
+    1-64 cada linha referente a um terreno, contem o outro 
+    */
+    std::ofstream save3 ("save/saveData3.txt");
+    if(save3.is_open()){
+        //infos dos exercitos
+        for(int i=0;i<8;i++){
+            for(int j=0;j<8;j++){
+                aux=std::to_string(mapa[i][j].getDono());
+                save3<<aux+"\n";
+            }
+        }
+        save3.close();
+    }else{
+        std::cerr <<"arquivo nao aberto"<<std::endl;
+    }
+    alert_window(13);//13 save game
+}
+void add_soldado1(int i,int j){
+    Soldado *s=new Soldado();
+    s->forca=(rand()%10)+3;
+    mapa[i][j].endereco->adicionarSoldado(s);
+}
+void load_game(){
+    //INFOS DO PLAYER
+    std::string line;
+    std::ifstream data0;
+    int linha=0;
+    data0.open("save/saveData0.txt");
+    if(data0.is_open()){
+        while(data0>>line){
+                if(linha==0){
+                    linha++;
+                    CivilPlayer.setRei(line);
+                }else{
+                    std::istringstream iss(line);
+                    int g;
+                    iss >> g;
+                    CivilPlayer.setOuro(g);
+                }
+            
+        }
+        data0.close();
+    }else{
+        //TODO::JANELA DE LOAD FALHO
+    }
+    //INFOS DOS EXERCITOS
+    std::ifstream data1;
+    std::string line2;
+    linha=0;
+    int i,j,k=0;//numero que começa o exercito e i,j do exercito
+    int aux;
+    int countAux=1;
+    data1.open("save/saveData1.txt");
+    if(data1.is_open()){
+        while(data1>>line){
+            if(countAux%3==0){
+                std::istringstream iss1(line);
+                iss1 >> aux;
+                k=aux;
+                mapa[i][j].addExercito(&CivilPlayer);
+                terras[i][j].changeColor(sf::Color(0, 0, 255));
+                for(int p=0;p<k;p++){
+                    add_soldado1(i,j);
+                }
+            }else if(countAux%2==0){
+                std::istringstream iss1(line);
+                iss1 >> aux;
+                j=aux;
+            }else{
+                std::istringstream iss1(line);
+                iss1 >> aux;
+                i=aux;
+            }
+            countAux++;
+        }
+        data1.close();
+    }else{
+        //TODO::JANELA DE LOAD FALHO
+    }
+
+    std::ifstream data2;
+    data2.open("save/saveData2.txt");
+    int y=1;
+    int u=0,w=0;
+    int ouro;
+    if(data2.is_open()){
+        while(data2>>line){
+            std::istringstream iss1(line);
+            iss1 >> aux;
+            ouro=aux;
+            mapa[w][u].SetQtdOuro(ouro);
+            if(y%8==0){
+                w++;
+                u=0;
+            }else{
+                u++;
+            }
+            y++;
+        }
+        data2.close();
+    }else{
+        //TODO::JANELA DE LOAD FALHO
+    }
+
+    std::ifstream data3;
+    data3.open("save/saveData3.txt");
+    y=1;
+    u=0;
+    w=0;
+    if(data3.is_open()){
+        while(data3>>line){
+            std::istringstream iss1(line);
+            iss1 >> aux;
+            ouro=aux;
+            mapa[w][u].setDono(ouro);
+            if(y%8==0){
+                w++;
+                u=0;
+            }else{
+                u++;
+            }
+            y++;
+        }
+        data3.close();
+    }else{
+        //TODO::JANELA DE LOAD FALHO
+    }
+
+}
 int main(){
+    
     srand(time(nullptr));
     //logica dos territorios s
     //alocando a matriz mapa
@@ -1310,27 +1538,15 @@ int main(){
     for(int i=0;i<8;i++){
         mapa[i]=new Territorio[8];
     }
-    //gerando o ouro de cada terreno
-    for(int i=0;i<8;i++){
-        for(int j=0;j<8;j++){
-            mapa[i][j].SetQtdOuro(rand()%100);
-        }
-    }
-    //deixando todos os terrenos sem dono
-    for(int i=0;i<8;i++){
-        for(int j=0;j<8;j++){
-            mapa[i][j].setDono(0);
-        }
-    }
+    
     ///DEFINIÇOES DO PLAYER
     //mana inicial 
     mana=3;
     //definindo player como dono da posicao (0,0) obs: playerID=1, iaID =2
     CivilPlayer.setId(1);
-    mapa[0][0].setDono(1);
     ///DEFINICOES DA IA
     CivilIa.setId(2);
-    mapa[7][7].setDono(2);
+    
     for(int i=0;i<64;i++){//zerando matriz exercitosDaIa
         for(int j=0;j<3;j++){
             exercitosDaIa[i][j]=0;
@@ -1340,6 +1556,7 @@ int main(){
     ia2=nullptr;
     ia3=nullptr;
     novo_exercito();
+    //save_game();
     ///iniciando o jogo
     menu();
     return 0;

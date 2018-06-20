@@ -15,6 +15,7 @@ public:
 	Civilizacao(std::string userName);
 	~Civilizacao()=default;
 	void setRei(std::string rei);
+	void setOuro(int gold);
 	std::string getRei();
 	int getOuro();
 	void addOuro(int quantidade_de_ouro);

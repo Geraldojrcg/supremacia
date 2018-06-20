@@ -5,6 +5,9 @@
 void  Territorio::SetQtdOuro(int ouro){
 	qtd_de_ouro=ouro;
 }
+int Territorio::getOuro(){
+	return qtd_de_ouro;
+}
 int Territorio::getQtdDeOuro(){
 	int ouro=qtd_de_ouro;
 	qtd_de_ouro=0;

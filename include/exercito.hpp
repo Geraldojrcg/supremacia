@@ -8,7 +8,7 @@
 class Exercito{
 public:
 	int posicao[2];
-	std::list<Soldado*> soldados;//deu ruim sendo public
+	std::list<Soldado*> soldados;//deu ruim sendo private
 	bool found;
 	int iaExercito=0;
 public:

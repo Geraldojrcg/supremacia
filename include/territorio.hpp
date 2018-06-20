@@ -20,6 +20,7 @@ public:
 	int getQtdDeOuro();
 	void changeOuro();
 	bool HaveOuro();
+	int getOuro();
 	//opcoes de exercito
 	void desocupar();
 	bool Ocupado();
