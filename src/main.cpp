@@ -1436,13 +1436,19 @@ void decisoes_ia(){
             decisao=rand()%3;
             switch(decisao){
                 case 0:
-                    mapa[ia1->posicao[0]][ia1->posicao[1]].getQtdDeOuro();
+                    if(ia1_){
+                        mapa[ia1->posicao[0]][ia1->posicao[1]].getQtdDeOuro();
+                    }
                     break;
                 case 1:
-                    mapa[ia2->posicao[0]][ia2->posicao[1]].getQtdDeOuro();
+                    if(ia2_){
+                        mapa[ia2->posicao[0]][ia2->posicao[1]].getQtdDeOuro();
+                    }
                     break;
                 case 2:
-                    mapa[ia3->posicao[0]][ia3->posicao[1]].getQtdDeOuro();
+                    if(ia3_){
+                        mapa[ia3->posicao[0]][ia3->posicao[1]].getQtdDeOuro();
+                    }
                     break;
             }
             break;
