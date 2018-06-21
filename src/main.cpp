@@ -54,6 +54,11 @@ Exercito *ia2;
 Exercito *ia3;
 //3 
 Exercito *ia4;
+//variave que diz se todas as ia estao e campo
+bool ia1_=false;
+bool ia2_=false;
+bool ia3_=false;
+bool ia4_=false;
 
 void start_game();
 void initializing_player_infos();
@@ -499,15 +504,19 @@ void deslocarExercito(int i,int j){//battle
             switch( mapa[i][j].endereco->iaExercito){
                 case 1:
                     ia1=nullptr;
+                    ia1_=false;
                     break;
                 case 2:
                     ia2=nullptr;
+                    ia2_=false;
                     break;
                 case 3:
                     ia3=nullptr;
+                    ia3_=false;
                     break;
                 case 4:
                     ia4=nullptr;
+                    ia4_=false;
                     break;
             }
             mapa[i][j].endereco=nullptr;
@@ -614,7 +623,7 @@ void alert_quit(){
     alert.close();
 }
 void alert_window(int codigo){
-    //codigo é referente ao qual foi o porque do alerte, abaixo o tipos
+    //codigo é referente ao qual foi o porque do alert, abaixo o tipos
     /*
     0 = soldados livres insuficiente para adicionar ao exercito
     1 = decisao falha ao comprar exercito
@@ -977,7 +986,7 @@ void menu(){
     text.setFont(font);
     text.setColor(sf::Color::White);
     text.setCharacterSize(18);
-    text.setPosition(20, 580);
+    text.setPosition(20, 560);
     text.setString("Music by Eric Matyas\nwww.soundimage.org");
 
     //botoes
@@ -1354,25 +1363,29 @@ void mover_ia2(int i,int j){//funcao de IA
     terras[x1][y1].changeColor(sf::Color(255, 0, 0));
 }
 void novo_exercito(){
-    if(!ia1){
+    if(!ia1&&!mapa[6][7].Ocupado()){
         mapa[6][7].addExercitoIa(&CivilIa,6,7);
         ia1=mapa[6][7].getEndereco();
-        ia1->iaExercito=1;    
+        ia1->iaExercito=1;
+        ia1_=true;    
     }
-    if(!ia2){
+    if(!ia2&&!mapa[6][6].Ocupado()){
         mapa[6][6].addExercitoIa(&CivilIa,6,6);
         ia2=mapa[6][6].getEndereco();
         ia2->iaExercito=2;
+        ia2_=true; 
     }
-    if(!ia3){
+    if(!ia3&&!mapa[7][6].Ocupado()){
         mapa[7][6].addExercitoIa(&CivilIa,7,6);
         ia3=mapa[7][6].getEndereco();
         ia3->iaExercito=3;
+        ia3_=true; 
     }
-    if(!ia4){
+    if(!ia4&&!mapa[5][7].Ocupado()){
         mapa[5][7].addExercitoIa(&CivilIa,5,7);
         ia4=mapa[5][7].getEndereco();
         ia4->iaExercito=4;
+        ia4_=true; 
     }
 }
 void add_soldado_ia(){
@@ -1402,13 +1415,19 @@ void decisoes_ia(){
             decisao=rand()%3;
             switch(decisao){
                 case 0:
-                    mover_ia(ia1->posicao[0],ia1->posicao[1]);
+                    if(ia1_){
+                        mover_ia(ia1->posicao[0],ia1->posicao[1]);
+                    }
                     break;
                 case 1:
-                    mover_ia(ia2->posicao[0],ia2->posicao[1]);
+                    if(ia2_){
+                        mover_ia(ia2->posicao[0],ia2->posicao[1]);
+                    }
                     break;
                 case 2:
-                    mover_ia(ia3->posicao[0],ia3->posicao[1]);
+                    if(ia3_){
+                        mover_ia(ia3->posicao[0],ia3->posicao[1]);
+                    }
                     break;
             }
             break;
@@ -1431,7 +1450,10 @@ void decisoes_ia(){
     //adicionar soldado
     add_soldado_ia();
     novo_exercito();
-    mover_ia2(ia4->posicao[0],ia4->posicao[1]);
+    if(ia4_){
+       mover_ia2(ia4->posicao[0],ia4->posicao[1]); 
+    }
+    
     //comprar soldado
     //atacar
 }
@@ -1703,7 +1725,6 @@ int main(){
     ia3=nullptr;
     ia4=nullptr;
     novo_exercito();
-    //save_game();
     ///iniciando o jogo
     menu();
     return 0;
